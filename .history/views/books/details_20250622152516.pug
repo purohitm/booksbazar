@@ -1,0 +1,27 @@
+extends ../layout
+
+block content
+    h1= title
+    
+    div.card
+        div.card-body
+            h5.card-title= book.title
+            p.card-text
+                | Author: #{book.author}
+                br
+                | Condition: #{book.condition}
+                br
+                | Price: $#{book.price}
+                br
+                | Posted by: #{book.seller?.name}
+                br
+                | Description:
+                br
+                | #{book.description}
+            div.d-flex.justify-content-between.align-items-center
+                if book.sellerId === user?.id
+                    div
+                        a.btn.btn-primary(href=`/books/${book.id}/edit`) Edit
+                        a.btn.btn-danger(href=`/books/${book.id}/delete`) Delete
+                else
+                    a.btn.btn-primary(href=`/books/${book.id}/contact`) Contact Seller

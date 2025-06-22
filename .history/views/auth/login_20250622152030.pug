@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    h1= title
+    
+    if message
+        .alert.alert-danger= message
+
+    form(method='POST' action='/auth/login')
+        .form-group
+            label(for='email') Email
+            input.form-control(type='email' name='email' id='email' required)
+        .form-group
+            label(for='password') Password
+            input.form-control(type='password' name='password' id='password' required)
+        .form-group
+            button.btn.btn-primary(type='submit') Login
+
+    p Don't have an account? a(href='/auth/register') Register here

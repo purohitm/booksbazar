@@ -34,15 +34,6 @@ app.use(passport.session());
 // Flash messages
 app.use(flash());
 
-// Add middleware to pass flash messages to views
-app.use((req, res, next) => {
-    res.locals.messages = {
-        error: req.flash('error'),
-        success: req.flash('success')
-    };
-    next();
-});
-
 // Routes
 app.use('/auth', require('./routes/auth'));
 app.use('/books', require('./routes/books'));
@@ -52,10 +43,7 @@ app.get('/', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/auth/login');
     } else {
-        res.render('books/browse', {
-            title: 'Browse Books',
-            user: req.user
-        });
+        res.redirect('/books');
     }
 });
 

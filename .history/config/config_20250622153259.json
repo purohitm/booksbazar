@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "your_mysql_username",
+    "password": "your_mysql_password",
+    "database": "booksbazar",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "your_mysql_username",
+    "password": "your_mysql_password",
+    "database": "booksbazar_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "your_mysql_username",
+    "password": "your_mysql_password",
+    "database": "booksbazar_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

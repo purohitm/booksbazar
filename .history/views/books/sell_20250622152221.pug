@@ -1,0 +1,29 @@
+extends layout
+
+block content
+    h1= title
+    
+    form(method='POST' action='/books/sell')
+        .form-group
+            label(for='title') Book Title
+            input.form-control(type='text' name='title' id='title' required)
+        .form-group
+            label(for='author') Author
+            input.form-control(type='text' name='author' id='author' required)
+        .form-group
+            label(for='description') Description
+            textarea.form-control(name='description' id='description' rows='3' required)
+        .form-group
+            label(for='price') Price
+            input.form-control(type='number' step='0.01' name='price' id='price' required)
+        .form-group
+            label(for='condition') Condition
+            select.form-control(name='condition' id='condition' required)
+                option(value='') Select condition
+                option(value='new') New
+                option(value='like new') Like New
+                option(value='good') Good
+                option(value='fair') Fair
+                option(value='poor') Poor
+        .form-group
+            button.btn.btn-primary(type='submit') Sell Book

@@ -52,10 +52,7 @@ app.get('/', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/auth/login');
     } else {
-        res.render('books/browse', {
-            title: 'Browse Books',
-            user: req.user
-        });
+        res.redirect('/books');
     }
 });
 

@@ -1,0 +1,24 @@
+extends ../layout
+
+block content
+    h1= title
+    
+    if books.length === 0
+        p No books available yet
+    else
+        div.row
+            each book in books
+                div.col-md-4.mb-4
+                    div.card
+                        div.card-body
+                            h5.card-title= book.title
+                            p.card-text
+                                | Author: #{book.author}
+                                br
+                                | Condition: #{book.condition}
+                                br
+                                | Price: $#{book.price}
+                            div.d-flex.justify-content-between.align-items-center
+                                a.btn.btn-primary(href=`/books/${book.id}`) View Details
+                                if book.sellerId === user?.id
+                                    a.btn.btn-danger(href=`/books/${book.id}/delete`) Delete
