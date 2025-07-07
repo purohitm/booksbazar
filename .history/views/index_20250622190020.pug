@@ -1,0 +1,98 @@
+extends layout
+
+block content
+    // Hero Section
+    div.hero-section
+        div.container
+            div.row.align-items-center
+                div.col-md-6
+                    h1.text-white Welcome to BooksBazar
+                    p.text-white-50 Find your next great read at amazing prices
+                    form.search-form(method='GET' action='/books/search' class='mt-4')
+                        div.input-group
+                            input.form-control(type='text' name='query' placeholder='Search for books...')
+                            button.btn.btn-primary(type='submit') Search
+                div.col-md-6
+                    img(src='/images/hero-book.png' alt='Books' class='img-fluid')
+
+    // Categories Section
+    div.categories-section.bg-light.py-5
+        div.container
+            h2.text-center.mb-4 Browse Categories
+            div.row.g-4
+                each category in categories
+                    div.col-md-4
+                        div.card.h-100
+                            div.card-body
+                                h5.card-title #{category.name}
+                                p.card-text #{category.description}
+                                a.btn.btn-outline-primary(href=`/books/category/${category.slug}`) Browse
+
+    // Featured Books Section
+    div.featured-section.py-5
+        div.container
+            h2.text-center.mb-4 Featured Books
+            div.row.g-4
+                if featuredBooks && featuredBooks.length > 0
+                    each book in featuredBooks
+                        div.col-md-3
+                            div.card.h-100
+                                img(src=book.coverImage class='card-img-top' alt=book.title)
+                                div.card-body
+                                    h5.card-title #{book.title}
+                                    p.card-text.text-muted Author: #{book.author}
+                                    if book.description
+                                        p.card-text.text-muted #{book.description.length > 100 ? book.description.substring(0, 100) + '...' : book.description}
+                                    else
+                                        p.card-text.text-muted No description available
+                                    div.d-flex.justify-content-between.align-items-center
+                                        span.text-primary Price: #{book.price}
+                                        a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                        span.text-muted #{book.publishedDate}
+                else
+                    div.text-center
+                        p.text-muted No featured books available
+                        a.btn.btn-primary(href='/books/sell') Sell Your Books
+
+    // Add CSS for home page
+    style.
+        .hero-section {
+            background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+            padding: 100px 0;
+            color: white;
+        }
+        .search-form .input-group {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .categories-section {
+            background: #f8f9fa;
+        }
+        .categories-section .card {
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        .categories-section .card:hover {
+            transform: translateY(-5px);
+        }
+        .featured-section {
+            background: white;
+        }
+        .featured-section .card {
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        .featured-section .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }

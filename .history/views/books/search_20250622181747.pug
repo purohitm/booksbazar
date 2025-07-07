@@ -1,0 +1,150 @@
+extends ../layout
+
+block content
+    div.container
+        // Search Header
+        div.mb-4
+            div.d-flex.justify-content-between.align-items-center
+                h1 Search Results
+                div.d-flex.gap-2
+                    // Sort by
+                    select.form-select.form-select-sm(id='sort-select' name='sort')
+                        option(value='relevance' selected=(sort === 'relevance')) Relevance
+                        option(value='newest' selected=(sort === 'newest')) Newest
+                        option(value='price' selected=(sort === 'price')) Price (Low to High)
+                        option(value='price-desc' selected=(sort === 'price-desc')) Price (High to Low)
+                    // Apply Button
+                    button.btn.btn-outline-secondary(id='apply-btn') Apply
+
+        // Search Results
+        div.row.g-4
+            if books && books.length > 0
+                each book in books
+                    div.col-md-3
+                        div.card.h-100
+                            // Book Cover
+                            div.position-relative
+                                img(src=book.coverImage class='card-img-top' alt=book.title)
+                                // Book Condition Badge
+                                div.position-absolute.top-0.start-0.p-2
+                                    span.badge.bg-info #{book.condition || 'New'}
+                            div.card-body
+                                h5.card-title #{book.title || 'Unknown Title'}
+                                p.card-text.text-muted Author: #{book.author || 'Unknown Author'}
+                                p.card-text.text-muted 
+                                    if book.description
+                                        | #{book.description.substring(0, 100)}...
+                                    else
+                                        | No description available
+                                div.d-flex.justify-content-between.align-items-center
+                                    span.text-primary 
+                                        if (book.price && book.price !== 'Not available')
+                                            | Price: #{book.price}
+                                        else
+                                            | Price: Not available
+                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                    span.text-muted 
+                                        if book.publishedDate
+                                            | #{book.publishedDate}
+                                        else
+                                            | Date not available
+            else
+                div.col-12.text-center
+                    h3 No books found
+                    p.text-muted Try searching with different keywords or filters
+                    form(method='GET' action='/books/search' class='mt-4')
+                        div.input-group
+                            input.form-control(type='text' name='query' placeholder='Try a different search' value=query)
+                            button.btn.btn-primary(type='submit') Search Again
+
+        // Pagination (Always show even if there's only one page)
+        nav.aria-label='Page navigation' class='mt-4'
+            ul.pagination.justify-content-center
+                if pagination.hasPrevious
+                    li.page-item
+                        a.page-link(href=`/books/search?q=${encodeURIComponent(query)}&sort=${sort}&page=${pagination.previousPage}`) Previous
+                li.page-item
+                    span.page-link Page #{pagination.currentPage} of #{pagination.totalPages}
+                if pagination.hasNext
+                    li.page-item
+                        a.page-link(href=`/books/search?q=${encodeURIComponent(query)}&sort=${sort}&page=${pagination.nextPage}`) Next
+
+    // Add JavaScript for Apply Button
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            const applyBtn = document.getElementById('apply-btn');
+            const sortSelect = document.getElementById('sort-select');
+            const query = '#{query}';
+
+            if (applyBtn && sortSelect) {
+                applyBtn.addEventListener('click', function() {
+                    const sort = sortSelect.value;
+                    window.location.href = `/books/search?q=${encodeURIComponent(query)}&sort=${sort}&page=1`;
+                });
+
+                // Add keyboard support
+                sortSelect.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyBtn.click();
+                    }
+                });
+            }
+        });
+
+    // Add CSS for search results page
+    style.
+        .card {
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .condition-badge {
+            background-color: #e9ecef;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .search-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .search-header .form-select {
+            width: auto;
+        }
+        .search-header .form-select-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        // Pagination styles
+        .pagination {
+            margin: 2rem 0;
+        }
+        .page-link {
+            color: #007bff;
+            border: 1px solid #dee2e6;
+        }
+        .page-link:hover {
+            color: #0056b3;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        .page-item.active .page-link {
+            z-index: 3;
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            cursor: default;
+        }

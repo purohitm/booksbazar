@@ -1,0 +1,74 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-md-8.offset-md-2
+                div.card.shadow
+                    div.card-body
+                        h2.card-title.text-center.mb-4 Edit Profile
+                        form(method='POST' action='/profile/edit' enctype='multipart/form-data')
+                            // Profile Picture
+                            div.text-center.mb-4
+                                if profilePicture
+                                    img.rounded-circle.mb-3(src=profilePicture alt='Profile Picture' style='width: 150px; height: 150px; object-fit: cover;')
+                                else
+                                    img.rounded-circle.mb-3(src='/images/default-profile.png' alt='Default Profile Picture' style='width: 150px; height: 150px;')
+                                div
+                                    label.btn.btn-primary.btn-sm
+                                        input.form-control(type='file' name='profilePicture' id='profilePicture' accept='image/jpeg,image/png,image/gif' style='display: none;')
+                                        i.bi.bi-camera
+                                        |  Change Photo
+
+                            // Name
+                            div.mb-3
+                                label.form-label Name
+                                input.form-control(type='text' name='name' value=user.name required)
+
+                            // Email
+                            div.mb-3
+                                label.form-label Email
+                                input.form-control(type='email' name='email' value=user.email disabled)
+                                small.form-text.text-muted Email cannot be changed
+
+                            // Password
+                            div.mb-3
+                                label.form-label Password
+                                input.form-control(type='password' name='password' placeholder='Leave blank to keep current password')
+
+                            // Confirm Password
+                            div.mb-4
+                                label.form-label Confirm Password
+                                input.form-control(type='password' name='confirmPassword' placeholder='Required if changing password')
+
+                            // Update Button
+                            div.d-grid
+                                button.btn.btn-primary(type='submit') Apply Changes
+                                a.btn.btn-secondary(href='/profile') Cancel
+
+        style.
+            .profile-edit {
+                max-width: 600px;
+                margin: 2rem auto;
+            }
+            .profile-edit img {
+                border: 3px solid #fff;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            .profile-edit label {
+                cursor: pointer;
+            }
+            .profile-edit input[type='file'] {
+                display: none;
+            }
+            .profile-edit .btn-file {
+                background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                transition: all 0.3s ease;
+            }
+            .profile-edit .btn-file:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }

@@ -1,0 +1,89 @@
+extends ../layout
+
+block content
+    div.container
+        // Book Header
+        div.row.mb-4
+            div.col-12
+                h1 #{book.title}
+                div.d-flex.align-items-center.gap-3
+                    if book.rating > 0
+                        span.badge.bg-warning.text-dark #{book.rating}★
+                    span.text-muted #{book.ratingCount} ratings
+                    span.text-muted #{book.language.toUpperCase()} • #{book.publishedDate}
+
+        // Book Main Content
+        div.row
+            // Book Cover
+            div.col-md-4
+                img.img-fluid(src=book.coverImage alt=book.title)
+                div.text-center.mt-3
+                    a.btn.btn-primary(href=book.previewLink target='_blank') Preview Book
+
+            // Book Details
+            div.col-md-8
+                // Book Info
+                div.card
+                    div.card-body
+                        h5.mb-3 Book Information
+                        ul.list-group.list-group-flush
+                            li.list-group-item
+                                strong Author:
+                                span.ms-2 #{book.author}
+                            li.list-group-item
+                                strong Publisher:
+                                span.ms-2 #{book.publisher}
+                            li.list-group-item
+                                strong ISBN:
+                                span.ms-2 #{book.isbn}
+                            li.list-group-item
+                                strong Pages:
+                                span.ms-2 #{book.pageCount}
+                            li.list-group-item
+                                strong Categories:
+                                span.ms-2 #{book.categories.join(', ')}
+                            li.list-group-item
+                                strong Price:
+                                span.ms-2 #{book.price || 'Not available'}
+                            li.list-group-item
+                                strong Condition:
+                                span.ms-2.text-success #{book.condition}
+
+                // Book Description
+                div.card.mt-4
+                    div.card-body
+                        h5.mb-3 Book Description
+                        p #{book.description}
+
+                // Actions
+                div.card.mt-4
+                    div.card-body
+                        h5.mb-3 Actions
+                        div.d-flex.gap-3
+                            if user
+                                a.btn.btn-primary(href=`/books/${book.id}/add-to-cart`) Add to Cart
+                                a.btn.btn-outline-primary(href=`/books/${book.id}/save`) Save for Later
+                            else
+                                a.btn.btn-primary(href='/auth/login') Login to Purchase
+                                a.btn.btn-outline-primary(href='/auth/login') Login to Save
+
+    // Add CSS for book detail page
+    style.
+        .book-cover {
+            height: 400px;
+            object-fit: contain;
+        }
+        .book-info-card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .book-info-card .card-body {
+            padding: 1.5rem;
+        }
+        .book-info-card .list-group-item {
+            border: none;
+            padding: 0.75rem 0;
+        }
+        .book-info-card .list-group-item strong {
+            color: #6c757d;
+        }

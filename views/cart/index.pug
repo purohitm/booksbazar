@@ -1,0 +1,98 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-12
+                h1.mb-4 Your Shopping Cart
+                
+                if cartItems && cartItems.length === 0
+                    div.text-center.p-5
+                        i.fas.fa-shopping-cart.display-1.text-muted.mb-3
+                        h4.text-muted Your cart is empty
+                        p.text-muted Add some items to your cart to get started
+                        a.btn.btn-primary(href='/books') Continue Shopping
+                else if cartItems && cartItems.length > 0
+                    div.table-responsive
+                        table.table.table-hover
+                            thead
+                                tr
+                                    th Product
+                                    th Price
+                                    th Quantity
+                                    th Subtotal
+                                    th Actions
+                            tbody
+                                each item in cartItems
+                                    tr(data-item-id=item.id)
+                                        td
+                                            div.d-flex.align-items-center
+                                                img(src=`${item.book.coverImage}` alt=`${item.book.title}` style='width: 80px; height: 120px; object-fit: cover; margin-right: 1rem;')
+                                                div
+                                                    h6.mb-0 #{item.book.title}
+                                                    small.text-muted #{item.book.author}
+                                        td.text-end #{item.book.price}
+                                        td
+                                            form(method='POST' action=`/cart/${item.id}/update` class='d-inline')
+                                                input.form-control.form-control-sm(type='number' name='quantity' value=item.quantity min='1' style='width: 80px;')
+                                        td.text-end #{(item.book.price * item.quantity).toFixed(2)}
+                                        td
+                                            form(method='POST' action=`/cart/${item.id}/remove` class='d-inline')
+                                                button.btn.btn-sm.btn-danger(type='submit')
+                                                    i.fas.fa-trash
+                        
+                    div.d-flex.justify-content-between.align-items-center.mt-4
+                        div
+                            h5 Total: #{total.toFixed(2)}
+                        div
+                            a.btn.btn-primary.me-2(href='/books') Continue Shopping
+                            button.btn.btn-success(type='button' onclick='checkout()') Proceed to Checkout
+
+                    // Checkout Modal
+                    div.modal.fade(id='checkoutModal' tabindex='-1')
+                        div.modal-dialog
+                            div.modal-content
+                                div.modal-header
+                                    h5.modal-title Checkout
+                                    button.close(type='button' data-bs-dismiss='modal')
+                                        span(aria-hidden='true') ×
+                                div.modal-body
+                                    form(id='checkoutForm')
+                                        .form-group.mb-3
+                                            label(for='address') Delivery Address
+                                            textarea.form-control(id='address' name='address' rows='3' required)
+                                        .form-group.mb-3
+                                            label(for='phone') Phone Number
+                                            input.form-control(type='tel' id='phone' name='phone' required)
+                                        .form-group.mb-3
+                                            label(for='paymentMethod') Payment Method
+                                            select.form-control(id='paymentMethod' name='paymentMethod' required)
+                                                option(value='') Select Payment Method
+                                                option(value='cash') Cash on Delivery
+                                                option(value='card') Credit/Debit Card
+                                                option(value='bank') Bank Transfer
+                                div.modal-footer
+                                    button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+                                    button.btn.btn-primary(type='submit' form='checkoutForm') Place Order
+
+    // Add styles
+    style.
+        .cart-item-image {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .cart-item-info {
+            margin-left: 1rem;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .cart-total {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }

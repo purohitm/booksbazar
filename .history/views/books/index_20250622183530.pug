@@ -1,0 +1,121 @@
+extends ../layout
+
+block content
+    div.container
+        // Search and Filter Section
+        div.mb-4
+            div.d-flex.justify-content-between.align-items-center
+                h1 All Books
+                div.d-flex.gap-2
+                    // Sort by
+                    select.form-select.form-select-sm(id='sort-select')
+                        option(value='relevance') Relevance
+                        option(value='newest') Newest
+                        option(value='price') Price (Low to High)
+                        option(value='price-desc') Price (High to Low)
+                    // Search
+                    form(method='GET' action='/books/search' class='d-flex')
+                        input.form-control(type='text' name='query' placeholder='Search books...')
+                        button.btn.btn-primary(type='submit') Search
+
+        // Books Grid
+        div.row.g-4
+            if books && books.length > 0
+                each book in books
+                    div.col-md-3
+                        div.card.h-100
+                            // Book Cover
+                            div.position-relative
+                                img(src=book.coverImage class='card-img-top' alt=book.title)
+                                // Book Condition Badge
+                                div.position-absolute.top-0.start-0.p-2
+                                    span.badge.bg-info #{book.condition || 'New'}
+                            div.card-body
+                                h5.card-title #{book.title || 'Unknown Title'}
+                                p.card-text.text-muted Author: #{book.author || 'Unknown Author'}
+                                p.card-text.text-muted 
+                                    if book.description
+                                        | #{book.description.substring(0, 100)}...
+                                    else
+                                        | No description available
+                                div.d-flex.justify-content-between.align-items-center
+                                    span.text-primary 
+                                        if (book.price && book.price !== 'Not available')
+                                            | Price: #{book.price}
+                                        else
+                                            | Price: Not available
+                                    div.d-flex.gap-2
+                                        a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                        if user
+                                            form(method='POST' action=`/books/${book.id}/add-to-cart` class='d-inline')
+                                                button.btn.btn-sm.btn-success(type='submit') Add to Cart
+                                            form(method='POST' action=`/books/${book.id}/save` class='d-inline')
+                                                button.btn.btn-sm.btn-warning(type='submit') Save for Later
+                                        else
+                                            a.btn.btn-sm.btn-primary(href='/auth/login') Login to Add
+            else
+                div.col-12.text-center
+                    h3 No books found
+                    p.text-muted Try searching with different keywords or filters
+                    form(method='GET' action='/books/search' class='mt-4')
+                        div.input-group
+                            input.form-control(type='text' name='query' placeholder='Try a different search')
+                            button.btn.btn-primary(type='submit') Search Again
+
+    // Add JavaScript for sorting
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            const sortSelect = document.getElementById('sort-select');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    const sort = this.value;
+                    window.location.href = `/books?sort=${sort}`;
+                });
+            }
+
+            // Add CSRF token to all forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                const token = '#{csrfToken}';
+                if (token) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = token;
+                    form.appendChild(input);
+                }
+            });
+        });
+
+    // Add CSS for books page
+    style.
+        .card {
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .condition-badge {
+            background-color: #e9ecef;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .search-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .search-header .form-select {
+            width: auto;
+        }
+        .search-header .form-select-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }

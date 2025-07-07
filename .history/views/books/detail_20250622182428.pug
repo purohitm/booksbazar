@@ -1,0 +1,89 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-md-4
+                img.img-fluid(src=book.coverImage alt=book.title)
+            div.col-md-8
+                h1 #{book.title}
+                p.text-muted #{book.author}
+                p.text-muted #{book.publisher}
+                p.text-muted #{book.publishedDate}
+                
+                // Price and Buy Section
+                div.d-flex.align-items-center.gap-3.mb-4
+                    h4.text-primary #{book.price}
+                    if user
+                        form(method='POST' action=`/books/${book.id}/buy` class='d-flex align-items-center gap-2')
+                            input.form-control(type='number' name='quantity' value='1' min='1' max='10' style='width: 80px')
+                            button.btn.btn-primary(type='submit') Buy Now
+                        div.d-flex.gap-2
+                            form(method='POST' action=`/books/${book.id}/add-to-cart`)
+                                button.btn.btn-success(type='submit') Add to Cart
+                            form(method='POST' action=`/books/${book.id}/save`)
+                                button.btn.btn-warning(type='submit') Save for Later
+                    else
+                        p.text-muted Please login to buy, add to cart, or save for later
+
+                // Description
+                div.mb-4
+                    h4 Description
+                    p #{book.description}
+
+                // Additional Info
+                div.row
+                    div.col-md-6
+                        h5 Categories
+                        ul.list-unstyled
+                            each category in book.categories
+                                li #{category}
+                    div.col-md-6
+                        h5 Book Details
+                        p ISBN: #{book.isbn}
+                        p Pages: #{book.pageCount}
+                        p Language: #{book.language}
+                        p Rating: #{book.rating} (#{book.ratingCount} ratings)
+
+                // Preview Link
+                if book.previewLink
+                    a.btn.btn-outline-primary(href=book.previewLink target='_blank') Preview Book
+
+    // Add JavaScript for form handling
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add CSRF token to all forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                const token = '#{csrfToken}';
+                if (token) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = token;
+                    form.appendChild(input);
+                }
+            });
+
+            // Handle buy button click
+            const buyForm = document.querySelector('form[action$="/buy"]');
+            if (buyForm) {
+                buyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const quantity = parseInt(this.querySelector('input[name="quantity"]').value);
+                    if (quantity < 1 || quantity > 10) {
+                        alert('Please enter a quantity between 1 and 10');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = 'Processing...';
+                    button.disabled = true;
+
+                    // Submit the form
+                    this.submit();
+                });
+            }
+        });

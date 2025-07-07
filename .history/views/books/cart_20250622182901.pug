@@ -1,0 +1,189 @@
+extends ../layout
+
+block content
+    div.container
+        // Cart Section
+        div.mb-5
+            h2 Your Cart
+            if cartItems && cartItems.length > 0
+                div.table-responsive
+                    table.table
+                        thead
+                            tr
+                                th Book
+                                th Price
+                                th Quantity
+                                th Total
+                                th Actions
+                        tbody
+                            each item in cartItems
+                                tr
+                                    td
+                                        div.d-flex.align-items-center.gap-3
+                                            img(src=item.Book.coverImage alt=item.Book.title width='50' height='70')
+                                            div
+                                                h6.m-0 #{item.Book.title}
+                                                small.text-muted #{item.Book.author}
+                                    td.text-primary #{item.Book.price}
+                                    td
+                                        form(method='POST' action=`/books/${item.Book.id}/update-cart` class='quantity-form')
+                                            input.form-control(type='number' name='quantity' value=item.quantity min='1' max='10' style='width: 80px')
+                                            input(type='hidden' name='cartId' value=item.id)
+                                            button.btn.btn-sm.btn-primary(type='submit') Update
+                                    td.text-primary #{(item.Book.price * item.quantity).toFixed(2)}
+                                    td
+                                        form(method='POST' action=`/books/${item.Book.id}/remove-from-cart` class='d-inline')
+                                            button.btn.btn-sm.btn-danger(type='submit') Remove
+            else
+                div.text-center
+                    h3 Your cart is empty
+                    p.text-muted Add books to your cart to see them here
+                    a.btn.btn-primary(href='/books') Continue Shopping
+
+        // Purchase History Section
+        div
+            h2 Your Purchases
+            if purchases && purchases.length > 0
+                div.mb-4
+                    each order in purchases
+                        div.card.mb-3
+                            div.card-header
+                                div.d-flex.justify-content-between.align-items-center
+                                    div
+                                        h5.m-0 Order ##{order.id}
+                                        small.text-muted #{moment(order.createdAt).format('MMM D, YYYY')}
+                                    div
+                                        span.text-success #{order.status}
+                                        small.text-muted Total: #{order.totalAmount}
+                            div.card-body
+                                div.table-responsive
+                                    table.table
+                                        thead
+                                            tr
+                                                th Book
+                                                th Price
+                                                th Quantity
+                                                th Total
+                                        tbody
+                                            each item in order.OrderItems
+                                                tr
+                                                    td
+                                                        div.d-flex.align-items-center.gap-3
+                                                            img(src=item.Book.coverImage alt=item.Book.title width='50' height='70')
+                                                            div
+                                                                h6.m-0 #{item.Book.title}
+                                                                small.text-muted #{item.Book.author}
+                                                    td.text-primary #{item.price}
+                                                    td #{item.quantity}
+                                                    td.text-primary #{(item.price * item.quantity).toFixed(2)}
+            else
+                div.text-center
+                    h3 No purchase history
+                    p.text-muted Start buying books to see them here
+                    a.btn.btn-primary(href='/books') Start Shopping
+
+    // Add JavaScript for cart functionality
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add CSRF token to all forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                const token = '#{csrfToken}';
+                if (token) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = token;
+                    form.appendChild(input);
+                }
+            });
+
+            // Handle quantity updates
+            const quantityForms = document.querySelectorAll('.quantity-form');
+            quantityForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const quantity = parseInt(this.querySelector('input[name="quantity"]').value);
+                    if (quantity < 1 || quantity > 10) {
+                        alert('Please enter a quantity between 1 and 10');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = 'Updating...';
+                    button.disabled = true;
+
+                    // Submit the form
+                    this.submit();
+                });
+            });
+
+            // Handle mock payment
+            const buyButtons = document.querySelectorAll('.buy-now');
+            buyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const bookId = this.dataset.bookId;
+                    const quantity = parseInt(this.dataset.quantity);
+                    
+                    // Create mock payment details
+                    const paymentDetails = {
+                        transactionId: `MOCK-${Date.now()}`,
+                        amount: this.dataset.amount,
+                        method: 'Mock Payment',
+                        status: 'Completed',
+                        date: new Date().toISOString()
+                    };
+
+                    // Show payment modal
+                    const modal = document.createElement('div');
+                    modal.className = 'modal fade';
+                    modal.id = 'paymentModal';
+                    modal.innerHTML = `
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Payment Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h5>Payment Successful!</h5>
+                                    <div class="mb-3">
+                                        <strong>Transaction ID:</strong> ${paymentDetails.transactionId}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Amount:</strong> ${paymentDetails.amount}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Payment Method:</strong> ${paymentDetails.method}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Status:</strong> <span class="text-success">${paymentDetails.status}</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Date:</strong> ${new Date(paymentDetails.date).toLocaleString()}
+                                    </div>
+                                    <div class="alert alert-info">
+                                        This is a mock payment. No real money was processed.
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+
+                    // Show modal
+                    const bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+
+                    // Remove modal when closed
+                    modal.addEventListener('hidden.bs.modal', () => {
+                        document.body.removeChild(modal);
+                    });
+                });
+            });
+        });

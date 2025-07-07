@@ -1,0 +1,88 @@
+extends ../layout
+
+block content
+    div.container
+        // Search Header
+        div.mb-4
+            div.d-flex.justify-content-between.align-items-center
+                h1 Search Results
+                div.d-flex.gap-2
+                    // Sort by
+                    select.form-select.form-select-sm
+                        option(value='relevance') Relevance
+                        option(value='newest') Newest
+                        option(value='price') Price (Low to High)
+                        option(value='price-desc') Price (High to Low)
+                    // Filter by
+                    button.btn.btn-outline-secondary Filter
+
+        // Search Results
+        div.row.g-4
+            if books && books.length > 0
+                each book in books
+                    div.col-md-3
+                        div.card.h-100
+                            // Book Cover
+                            div.position-relative
+                                img(src=book.coverImage class='card-img-top' alt=book.title)
+                                // Book Condition Badge
+                                div.position-absolute.top-0.start-0.p-2
+                                    span.badge.bg-info #{book.condition}
+                            div.card-body
+                                h5.card-title #{book.title}
+                                p.card-text.text-muted Author: #{book.author}
+                                p.card-text.text-muted #{book.description.substring(0, 100)}...
+                                div.d-flex.justify-content-between.align-items-center
+                                    span.text-primary Price: #{book.price}
+                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                    span.text-muted #{book.publishedDate}
+            else
+                div.col-12.text-center
+                    h3 No books found
+                    p.text-muted Try searching with different keywords or filters
+                    form(method='GET' action='/books/search' class='mt-4')
+                        div.input-group
+                            input.form-control(type='text' name='query' placeholder='Try a different search')
+                            button.btn.btn-primary(type='submit') Search Again
+
+        // Pagination
+        if pagination
+            nav.aria-label='Page navigation'
+                ul.pagination.justify-content-center
+                    if pagination.previous
+                        li.page-item
+                            a.page-link(href=`/books/search?q=${encodeURIComponent(query)}&page=${pagination.previous}`) Previous
+                    li.page-item
+                        span.page-link Page #{pagination.currentPage} of #{pagination.totalPages}
+                    if pagination.next
+                        li.page-item
+                            a.page-link(href=`/books/search?q=${encodeURIComponent(query)}&page=${pagination.next}`) Next
+
+    // Add CSS for search results page
+    style.
+        .card {
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .condition-badge {
+            background-color: #e9ecef;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .search-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .search-header .form-select {
+            width: auto;
+        }

@@ -1,0 +1,130 @@
+extends ../layout
+
+block content
+    div.container
+        // Hero Section
+        div.hero-section.text-center.mb-5
+            h1.display-4 Contact Us
+            p.lead.text-muted We're here to help! Connect with our team for support, feedback, or any questions
+
+        // Contact Content
+        div.row.g-4
+            // Contact Form
+            div.col-lg-6
+                div.contact-card.card.h-100
+                    div.card-body
+                        h3 Get in Touch
+                        form(method='POST' action='/contact')
+                            div.mb-3
+                                label.form-label Your Name
+                                input.form-control(type='text' name='name' required)
+                            div.mb-3
+                                label.form-label Email Address
+                                input.form-control(type='email' name='email' required)
+                            div.mb-3
+                                label.form-label Subject
+                                select.form-select(name='subject' required)
+                                    option(value='') Select a subject
+                                    option(value='support') General Support
+                                    option(value='problem') Report a Problem
+                                    option(value='suggestion') Suggestion
+                                    option(value='other') Other
+                            div.mb-3
+                                label.form-label Message
+                                textarea.form-control(name='message' rows='5' required)
+                            div.text-end
+                                button.btn.btn-primary(type='submit') Send Message
+
+            // Contact Info
+            div.col-lg-6
+                div.contact-info-card.card.h-100
+                    div.card-body
+                        h3 Contact Information
+                        
+                        // Email Section
+                        div.contact-item.mb-4
+                            i.fas.fa-envelope.text-primary.me-3
+                            div
+                                h5 Email Support
+                                p.mb-0 General inquiries: support@booksbazar.com
+                                p.mb-0 Report a problem: help@booksbazar.com
+
+                        // Social Media Section
+                        div.contact-item.mb-4
+                            i.fas.fa-share-alt.text-primary.me-3
+                            div
+                                h5 Social Media
+                                div.d-flex.gap-2
+                                    a.text-primary(href='#' target='_blank')
+                                        i.fab.fa-instagram
+                                    a.text-primary(href='#' target='_blank')
+                                        i.fab.fa-twitter
+                                    a.text-primary(href='#' target='_blank')
+                                        i.fab.fa-facebook
+
+                        // Office Section
+                        div.contact-item
+                            i.fas.fa-map-marker-alt.text-primary.me-3
+                            div
+                                h5 Our Office
+                                p BooksBazar Pvt Ltd
+                                p 123 Book Street, Knowledge City
+                                p London, UK - EC1A 1BB
+
+        // Add CSS
+        style.
+            :root {
+                --cream: #f5f0e8;
+                --muted-orange: #d4a373;
+                --dusty-blue: #7895b2;
+                --olive-green: #8a9a5b;
+                --warm-gray: #7a7a7a;
+            }
+
+            .hero-section {
+                padding: 4rem 0;
+            }
+
+            .contact-card, .contact-info-card {
+                border: none;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .contact-item {
+                display: flex;
+                align-items: flex-start;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                background: var(--cream);
+            }
+
+            .contact-item i {
+                font-size: 1.5rem;
+            }
+
+            .contact-item h5 {
+                margin-bottom: 0.5rem;
+            }
+
+            .contact-item p {
+                margin-bottom: 0.25rem;
+            }
+
+            .contact-item a {
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .contact-item a:hover {
+                color: var(--muted-orange) !important;
+            }
+
+            @media (max-width: 768px) {
+                .hero-section {
+                    padding: 2rem 0;
+                }
+
+                .contact-card, .contact-info-card {
+                    margin-bottom: 2rem;
+                }
+            }

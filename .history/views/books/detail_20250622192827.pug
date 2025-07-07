@@ -1,0 +1,58 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-md-4.mb-4
+                div.position-relative
+                    img.img-fluid(src=book.coverImage || '/images/default-book.png' alt=book.title width='300' height='450' style='object-fit: cover; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)')
+                    if book.coverImage && book.coverImage !== '/images/default-book.png'
+                        div.position-absolute.top-0.start-0.p-2
+                            span.badge.bg-success.text-white.px-3.py-1.rounded-pill Custom Cover
+            div.col-md-8
+                h1 #{book.title}
+                h4.text-muted #{book.author}
+                
+                div.mt-4
+                    h5 Description
+                    p #{book.description || 'No description available'}
+                
+                div.mt-4
+                    h5 Book Details
+                    ul.list-unstyled
+                        li
+                            span.text-muted Publisher:
+                            |  #{book.publisher || 'Unknown Publisher'}
+                        li
+                            span.text-muted Published:
+                            |  #{book.publishedDate ? book.publishedDate : 'Unknown'}
+                        li
+                            span.text-muted Pages:
+                            |  #{book.pageCount || 'Unknown'}
+                        li
+                            span.text-muted Language:
+                            |  #{book.language || 'Unknown'}
+                        li
+                            span.text-muted Rating:
+                            |  #{book.rating || 0} (#{book.ratingCount || 0} ratings)
+                
+                div.mt-4
+                    h5 Condition
+                    p #{book.condition || 'Unknown'}
+                
+                div.mt-4
+                    h5 Price
+                    h2.text-primary #{book.price || 0}
+                
+                div.mt-4
+                    if user
+                        if user.id !== book.userId
+                            form(method='POST' action=`/books/${book.id}/add-to-cart` class='d-inline')
+                                input(type='hidden' name='quantity' value='1')
+                                button.btn.btn-primary(type='submit') Add to Cart
+                            form(method='POST' action=`/books/${book.id}/save` class='d-inline ms-2')
+                                button.btn.btn-secondary(type='submit') Save for Later
+                        else
+                            p.text-muted This is your book listing
+                    else
+                        a.btn.btn-primary(href='/auth/login') Sign in to add to cart

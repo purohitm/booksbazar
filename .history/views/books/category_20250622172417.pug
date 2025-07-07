@@ -1,0 +1,77 @@
+extends ../layout
+
+block content
+    div.container
+        div.row.mb-4
+            div.col-12
+                h1 Category: #{categoryName}
+                p.text-muted #{categoryDescription}
+
+        // Breadcrumb
+        nav.aria-label='breadcrumb'
+            ol.breadcrumb
+                li.breadcrumb-item
+                    a(href='/') Home
+                li.breadcrumb-item
+                    a(href='/books') All Books
+                li.breadcrumb-item.active aria-current='page' #{categoryName}
+
+        // Books Grid
+        div.row.g-4
+            if books && books.length > 0
+                each book in books
+                    div.col-md-3
+                        div.card.h-100
+                            img(src=book.coverImage class='card-img-top' alt=book.title)
+                            div.card-body
+                                h5.card-title #{book.title}
+                                p.card-text.text-muted Author: #{book.author}
+                                p.card-text.text-muted #{book.description.substring(0, 100)}...
+                                div.d-flex.justify-content-between.align-items-center
+                                    span.text-primary Price: #{book.price}
+                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                    span.text-muted #{book.publishedDate}
+            else
+                div.text-center.p-5
+                    h4 No Books Found
+                    p.text-muted Try searching for books in this category
+                    form(method='GET' action='/books/search' class='mt-4')
+                        div.input-group
+                            input.form-control(type='text' name='query' placeholder='Search in this category')
+                            button.btn.btn-primary(type='submit') Search
+
+        // Pagination
+        if pagination
+            nav.aria-label='Page navigation'
+                ul.pagination.justify-content-center
+                    if pagination.previous
+                        li.page-item
+                            a.page-link(href=`/books/category/${categorySlug}?page=${pagination.previous}`) Previous
+                    li.page-item.disabled
+                        span.page-link Page #{pagination.currentPage} of #{pagination.totalPages}
+                    if pagination.next
+                        li.page-item
+                            a.page-link(href=`/books/category/${categorySlug}?page=${pagination.next}`) Next
+
+    // Add CSS for category page
+    style.
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .breadcrumb {
+            background: none;
+            padding: 0;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: #6c757d;
+        }

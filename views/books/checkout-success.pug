@@ -1,0 +1,118 @@
+extends ../layout
+
+block content
+    div.container
+        div.text-center.mb-5
+            h1.text-success ✓ Purchase Successful!
+            h2 Thank you for your order!
+            p.text-muted Your order has been successfully processed.
+
+        // Order Summary
+        div.card.mb-5
+            div.card-header
+                h4 Order Summary
+            div.card-body
+                div.row
+                    div.col-md-6
+                        h5 Order Information
+                        ul.list-unstyled
+                            li
+                                strong Order Number:
+                                span #{order.id}
+                            li
+                                strong Date:
+                                span #{moment(order.createdAt).format('MMM D, YYYY')}
+                            li
+                                strong Status:
+                                span.text-success #{order.status}
+                            li
+                                strong Total Amount:
+                                span #{order.totalAmount}
+                    div.col-md-6
+                        h5 Shipping Address
+                        ul.list-unstyled
+                            li
+                                strong Name:
+                                span #{order.shippingAddress.firstName} #{order.shippingAddress.lastName}
+                            li
+                                strong Address:
+                                span #{order.shippingAddress.address}
+                            li
+                                strong City:
+                                span #{order.shippingAddress.city}
+                            li
+                                strong ZIP Code:
+                                span #{order.shippingAddress.zip}
+
+        // Payment Details
+        div.card
+            div.card-header
+                h4 Payment Details
+            div.card-body
+                div.row
+                    div.col-md-6
+                        h5 Payment Information
+                        ul.list-unstyled
+                            li
+                                strong Transaction ID:
+                                span #{paymentDetails.transactionId}
+                            li
+                                strong Payment Method:
+                                span #{paymentDetails.method}
+                            li
+                                strong Status:
+                                span.text-success #{paymentDetails.status}
+                            li
+                                strong Card Type:
+                                span #{paymentDetails.cardType}
+                            li
+                                strong Card Last 4:
+                                span #{paymentDetails.cardLast4}
+                            li
+                                strong Cardholder Name:
+                                span #{paymentDetails.cardholderName}
+                    div.col-md-6
+                        h5 Order Items
+                        div.table-responsive
+                            table.table
+                                thead
+                                    tr
+                                        th Book
+                                        th Price
+                                        th Quantity
+                                        th Total
+                                tbody
+                                    each item in order.OrderItems
+                                        tr
+                                            td
+                                                div.d-flex.align-items-center.gap-3
+                                                    img(src=item.Book.coverImage alt=item.Book.title width='50' height='70')
+                                                    div
+                                                        h6.m-0 #{item.Book.title}
+                                                        small.text-muted #{item.Book.author}
+                                            td.text-primary #{item.price}
+                                            td #{item.quantity}
+                                            td.text-primary #{(item.price * item.quantity).toFixed(2)}
+
+        // Action Buttons
+        div.text-center.mt-4
+            a.btn.btn-primary(href='/books/cart') Return to Cart
+            a.btn.btn-secondary(href='/books') Continue Shopping
+
+    // Add CSS for checkout success page
+    style.
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .list-unstyled li {
+            margin-bottom: 0.5rem;
+        }
+        .list-unstyled strong {
+            display: inline-block;
+            min-width: 120px;
+        }

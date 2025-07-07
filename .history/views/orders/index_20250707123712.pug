@@ -1,0 +1,35 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-12
+                h1.mb-4 My Orders
+                
+                if !orders?.length
+                    div.text-center.p-5
+                        i.fas.fa-boxes.display-1.text-muted.mb-3
+                        h4.text-muted No orders yet
+                        p.text-muted You haven't placed any orders yet
+                        a.btn.btn-primary(href='/books') Start Shopping
+                else
+                    div.table-responsive
+                        table.table.table-hover
+                            thead
+                                tr
+                                    th Order #
+                                    th Date
+                                    th Total
+                                    th Status
+                                    th Actions
+                            tbody
+                                each order in orders
+                                    tr
+                                        td #{order.id}
+                                        td #{new Date(order.createdAt).toLocaleDateString()}
+                                        td.text-end #{order.total.toFixed(2)}
+                                        td
+                                            span.badge.bg-#{order.status === 'pending' ? 'warning' : order.status === 'completed' ? 'success' : 'secondary'}
+                                                #{order.status}
+                                        td
+                                            a.btn.btn-sm.btn-primary(href=`/orders/${order.id}`) View Details

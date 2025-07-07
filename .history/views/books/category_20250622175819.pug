@@ -1,0 +1,91 @@
+extends ../layout
+
+block content
+    div.container
+        div.row.mb-4
+            div.col-12
+                h1 #{categoryName}
+                p.text-muted #{categoryDescription}
+
+        // Filter Section
+        div.row.mb-4
+            div.col-md-3
+                div.card
+                    div.card-body
+                        h5.mb-3 Filter Books
+                        // Sort by
+                        div.mb-3
+                            label.form-label Sort by
+                            select.form-select(name='sort')
+                                option(value='relevance') Relevance
+                                option(value='newest') Newest
+                                option(value='price') Price (Low to High)
+                                option(value='price-desc') Price (High to Low)
+                        // Price range
+                        div.mb-3
+                            label.form-label Price Range
+                            div.d-flex.gap-2
+                                input.form-control(type='number' name='minPrice' placeholder='Min Price')
+                                input.form-control(type='number' name='maxPrice' placeholder='Max Price')
+                        // Book condition
+                        div.mb-3
+                            label.form-label Condition
+                            select.form-select(name='condition')
+                                option(value='') All Conditions
+                                option(value='new') New
+                                option(value='like_new') Like New
+                                option(value='good') Good
+                                option(value='acceptable') Acceptable
+                        // Apply Filters Button
+                        button.btn.btn-primary.w-100(type='submit') Apply Filters
+
+        // Books Grid
+        div.row.g-4
+            if books && books.length > 0
+                each book in books
+                    div.col-md-3
+                        div.card.h-100
+                            // Book Cover
+                            div.position-relative
+                                img(src=book.coverImage class='card-img-top' alt=book.title)
+                                // Book Condition Badge
+                                div.position-absolute.top-0.start-0.p-2
+                                    span.badge.bg-info #{book.condition}
+                            div.card-body
+                                h5.card-title #{book.title}
+                                p.card-text.text-muted Author: #{book.author}
+                                p.card-text.text-muted #{book.description.substring(0, 100)}...
+                                div.d-flex.justify-content-between.align-items-center
+                                    span.text-primary Price: #{book.price}
+                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                    span.text-muted #{book.publishedDate}
+            else
+                div.col-12.text-center
+                    h3 No books found
+                    p.text-muted Try adjusting your filters or search again
+                    a.btn.btn-primary(href='/') Back to Home
+
+    // Add CSS for category page
+    style.
+        .card {
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .filter-section {
+            position: sticky;
+            top: 20px;
+        }
+        .condition-badge {
+            background-color: #e9ecef;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }

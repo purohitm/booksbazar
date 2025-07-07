@@ -1,0 +1,129 @@
+extends ../layout
+
+block content
+    div.container
+        // Hero Section
+        div.hero-section.text-center.mb-5
+            h1.display-4 About BooksBazar
+            p.lead.text-muted Discover, connect, and share your love for reading with a vibrant community of book enthusiasts
+
+        // Main Content
+        div.row.g-4
+            // About Section
+            div.col-lg-8
+                h2 About BooksBazar
+                p BooksBazar is a simple and user-friendly online platform that connects book buyers and sellers. Whether you're a student looking for affordable academic books or a reader hunting for the latest fiction, BooksBazar is your go-to marketplace.
+                
+                div.row.g-4
+                    // Features Grid
+                    div.col-md-6
+                        div.feature-card.card.h-100
+                            div.card-body
+                                h5.card-title Readers
+                                p.card-text Explore and purchase books easily.
+                    div.col-md-6
+                        div.feature-card.card.h-100
+                            div.card-body
+                                h5.card-title Sellers
+                                p.card-text List and manage your book collection for sale.
+                    div.col-md-6
+                        div.feature-card.card.h-100
+                            div.card-body
+                                h5.card-title Community
+                                p.card-text Connect directly with sellers or buyers.
+
+                // Mission Section
+                div.mission-section.bg-light.p-4.rounded-3.mb-4
+                    h3 Our Mission
+                    p To make book buying and selling simple, secure, and accessible for everyone — from students to book lovers.
+
+                // What Makes Us Different
+                div.different-section.bg-light.p-4.rounded-3
+                    h3 What Makes Us Different?
+                    div.d-grid.g-3
+                        div
+                            i.fas.fa-paint-brush.text-primary.me-2
+                            span Clean and responsive UI
+                        div
+                            i.fas.fa-search.text-primary.me-2
+                            span Easy search and filter
+                        div
+                            i.fas.fa-comments.text-primary.me-2
+                            span Direct communication
+                        div
+                            i.fas.fa-handshake.text-primary.me-2
+                            span No hidden fees
+                        div
+                            i.fas.fa-heart.text-primary.me-2
+                            span Wishlist management
+
+            // Stats Section
+            div.col-lg-4
+                div.stats-card.card.h-100
+                    div.card-body
+                        h3.text-center Join Our Community
+                        div.d-flex.justify-content-between.align-items-center.mb-3
+                            div
+                                i.fas.fa-users.text-primary.me-2
+                                span Members
+                            div
+                                span.text-primary 10,000+
+                        div.d-flex.justify-content-between.align-items-center.mb-3
+                            div
+                                i.fas.fa-book-open.text-primary.me-2
+                                span Books
+                            div
+                                span.text-primary 50,000+
+                        div.d-flex.justify-content-between.align-items-center
+                            div
+                                i.fas.fa-comments.text-primary.me-2
+                                span Reviews
+                            div
+                                span.text-primary 10,000+
+
+        // Add CSS
+        style.
+            :root {
+                --cream: #f5f0e8;
+                --muted-orange: #d4a373;
+                --dusty-blue: #7895b2;
+                --olive-green: #8a9a5b;
+                --warm-gray: #7a7a7a;
+            }
+
+            .hero-section {
+                padding: 4rem 0;
+            }
+
+            .feature-card {
+                border: none;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease;
+            }
+
+            .feature-card:hover {
+                transform: translateY(-5px);
+            }
+
+            .stats-card {
+                border: none;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .different-section {
+                background: var(--cream);
+            }
+
+            .different-section i {
+                font-size: 1.5rem;
+            }
+
+            @media (max-width: 768px) {
+                .hero-section {
+                    padding: 2rem 0;
+                }
+
+                .stats-card {
+                    margin-bottom: 2rem;
+                }
+            }

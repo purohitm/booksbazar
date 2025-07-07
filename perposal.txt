@@ -1,0 +1,88 @@
+Sure! Here's the updated list of features for your **Old Books Reselling Website** — **excluding Phase 4 (Admin Features)**:
+
+---
+
+### ✅ Basic User Features (Phase 1)
+
+1. **User Registration & Login**
+
+   * Signup/Login using email and password
+   * Basic authentication (JWT or localStorage-based)
+
+2. **User Profile Management**
+
+   * View and edit personal information
+   * Upload profile picture (optional)
+
+3. **Home Page / Dashboard**
+
+   * Search bar to find books
+   * Categories: Fiction, Non-fiction, Academic, etc.
+
+4. **Book Listing Page**
+
+   * Browse books by category or latest added
+   * Pagination support
+
+5. **Book Details Page**
+
+   * Book title, author, description, price, seller info
+   * "Buy Now" or "Contact Seller" button
+
+---
+
+### 📦 Seller Features (Phase 2)
+
+6. **Add Book for Sale**
+
+   * Upload book image
+   * Enter title, author, condition, price, and category
+
+7. **Manage Listings**
+
+   * Edit or delete books listed by the seller
+   * View listing status (Available/Sold)
+
+8. **Mark Book as Sold**
+
+   * Option to update availability after sale
+
+---
+
+### 💬 Buyer Features (Phase 3)
+
+9. **Request to Buy / Contact Seller**
+
+   * Send message or inquiry to seller
+   * Option to chat or send email (basic messaging)
+
+10. **Wishlist**
+
+* Save books for later purchase
+
+---
+
+### 🔍 Other Enhancements (Phase 4)
+
+11. **Search & Filter**
+
+* Search by title, author, or category
+* Filter by price, condition, or location
+
+12. **Ratings & Reviews (optional)**
+
+* Buyer can rate the seller or book
+
+13. **Book Pickup/Delivery Option (optional)**
+
+* Indicate if the book is available for delivery or pickup
+
+14. **Responsive UI**
+
+* Mobile-friendly and clean interface
+
+15. **SEO-friendly URLs and Meta Tags**
+
+---
+
+Let me know if you want this as a document or need help building any specific feature.

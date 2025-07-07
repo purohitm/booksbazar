@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+    h1= title
+    div.container
+        div.row
+            div.col-md-4
+                if profilePicture
+                    img.img-fluid.rounded.mb-3(src=profilePicture alt='Profile Picture')
+                else
+                    img.img-fluid.rounded.mb-3(src='/images/default-profile.png' alt='Default Profile Picture')
+            div.col-md-8
+                h2 #{user.name}
+                p Email: #{user.email}
+                p Role: #{user.role}
+                div.mt-4
+                    a.btn.btn-primary(href='/profile/edit') Edit Profile

@@ -1,0 +1,210 @@
+extends ../layout
+
+block content
+    div.container
+        // Cart Section
+        div.mb-5
+            h2 Your Cart
+            if cartItems && cartItems.length > 0
+                div.table-responsive
+                    table.table
+                        thead
+                            tr
+                                th Book
+                                th Price
+                                th Quantity
+                                th Total
+                                th Actions
+                        tbody
+                            each item in cartItems
+                                tr
+                                    td
+                                        div.d-flex.align-items-center.gap-3
+                                            img(src=item.Book.coverImage ? item.Book.coverImage : '/images/default-book.png' alt=item.Book.title || 'Unknown Book' width='50' height='70')
+                                            div
+                                                h6.m-0 #{item.Book.title || 'Unknown Title'}
+                                                small.text-muted #{item.Book.author || 'Unknown Author'}
+                                                if item.Book.publisher
+                                                    small.text-muted #{item.Book.publisher}
+                                                if item.Book.publishedDate
+                                                    small.text-muted #{moment(item.Book.publishedDate).format('YYYY')}
+                                    td.text-primary #{item.Book.price || 'Not available'}
+                                    td
+                                        form(method='POST' action=`/books/${item.Book.id}/update-cart` class='quantity-form')
+                                            input.form-control(type='number' name='quantity' value=item.quantity min='1' max='10' style='width: 80px')
+                                            input(type='hidden' name='cartId' value=item.id)
+                                            button.btn.btn-sm.btn-primary(type='submit') Update
+                                    td.text-primary #{(item.Book.price * item.quantity).toFixed(2) || 'Not available'}
+                                    td
+                                        form(method='POST' action=`/books/${item.Book.id}/remove-from-cart` class='d-inline')
+                                            button.btn.btn-sm.btn-danger(type='submit') Remove
+                div.d-flex.justify-content-end.mt-3
+                    h4 Total: #{totalAmount.toFixed(2)}
+                div.mt-3
+                    form(method='POST' action='/books/checkout' class='checkout-form')
+                        div.row.g-3
+                            div.col-md-6
+                                div.form-group
+                                    label(for='firstName') First Name
+                                    input.form-control(type='text' name='firstName' required)
+                            div.col-md-6
+                                div.form-group
+                                    label(for='lastName') Last Name
+                                    input.form-control(type='text' name='lastName' required)
+                            div.col-md-6
+                                div.form-group
+                                    label(for='email') Email
+                                    input.form-control(type='email' name='email' required)
+                            div.col-md-6
+                                div.form-group
+                                    label(for='phone') Phone
+                                    input.form-control(type='tel' name='phone' required)
+                            div.col-md-12
+                                div.form-group
+                                    label(for='address') Address
+                                    input.form-control(type='text' name='address' required)
+                            div.col-md-6
+                                div.form-group
+                                    label(for='city') City
+                                    input.form-control(type='text' name='city' required)
+                            div.col-md-6
+                                div.form-group
+                                    label(for='zip') ZIP Code
+                                    input.form-control(type='text' name='zip' required)
+                        div.mt-3
+                            h4 Payment Details
+                            div.form-group
+                                label(for='cardName') Cardholder Name
+                                input.form-control(type='text' name='cardName' required)
+                            div.form-group
+                                label(for='cardNumber') Card Number
+                                input.form-control(type='text' name='cardNumber' required pattern='\d{16}' placeholder='1234 5678 9012 3456')
+                            div.row.g-3
+                                div.col-md-6
+                                    div.form-group
+                                        label(for='expDate') Expiration Date
+                                        input.form-control(type='text' name='expDate' required pattern='\d{2}/\d{2}' placeholder='MM/YY')
+                                div.col-md-6
+                                    div.form-group
+                                        label(for='cvv') CVV
+                                        input.form-control(type='text' name='cvv' required pattern='\d{3}' placeholder='123')
+                        div.mt-4
+                            button.btn.btn-primary(type='submit') Complete Purchase
+            else
+                div.text-center
+                    h3 Your cart is empty
+                    p.text-muted Add books to your cart to see them here
+                    a.btn.btn-primary(href='/books') Continue Shopping
+
+        // Purchase History Section
+        div
+            h2 Your Purchases
+            if purchases && purchases.length > 0
+                div.mb-4
+                    each order in purchases
+                        div.card.mb-3
+                            div.card-header
+                                div.d-flex.justify-content-between.align-items-center
+                                    div
+                                        h5.m-0 Order ##{order.id}
+                                        small.text-muted #{moment(order.createdAt).format('MMM D, YYYY')}
+                                    div
+                                        span.text-success #{order.status}
+                                        small.text-muted Total: #{order.totalAmount}
+                            div.card-body
+                                div.table-responsive
+                                    table.table
+                                        thead
+                                            tr
+                                                th Book
+                                                th Price
+                                                th Quantity
+                                                th Total
+                                        tbody
+                                            each item in order.OrderItems
+                                                tr
+                                                    td
+                                                        div.d-flex.align-items-center.gap-3
+                                                            img(src=item.Book.coverImage ? item.Book.coverImage : '/images/default-book.png' alt=item.Book.title || 'Unknown Book' width='50' height='70')
+                                                            div
+                                                                h6.m-0 #{item.Book.title || 'Unknown Title'}
+                                                                small.text-muted #{item.Book.author || 'Unknown Author'}
+                                                                if item.Book.publisher
+                                                                    small.text-muted #{item.Book.publisher}
+                                                                if item.Book.publishedDate
+                                                                    small.text-muted #{moment(item.Book.publishedDate).format('YYYY')}
+                                                    td.text-primary #{item.price || 'Not available'}
+                                                    td #{item.quantity}
+                                                    td.text-primary #{(item.price * item.quantity).toFixed(2) || 'Not available'}
+            else
+                div.text-center
+                    h3 No purchase history
+                    p.text-muted Start buying books to see them here
+                    a.btn.btn-primary(href='/books') Start Shopping
+
+    // Add JavaScript for cart functionality
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add CSRF token to all forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                const token = '#{csrfToken}';
+                if (token) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = token;
+                    form.appendChild(input);
+                }
+            });
+
+            // Handle quantity updates
+            const quantityForms = document.querySelectorAll('.quantity-form');
+            quantityForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const quantity = parseInt(this.querySelector('input[name="quantity"]').value);
+                    if (quantity < 1 || quantity > 10) {
+                        alert('Please enter a quantity between 1 and 10');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = 'Updating...';
+                    button.disabled = true;
+
+                    // Submit the form
+                    this.submit();
+                });
+            });
+
+            // Handle checkout form
+            const checkoutForm = document.querySelector('.checkout-form');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Validate form
+                    const isValid = Array.from(this.elements).every(element => {
+                        if (element.required && !element.value.trim()) {
+                            alert(`Please fill in the ${element.name} field`);
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (!isValid) return;
+
+                    // Show loading state
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = 'Processing Payment...';
+                    button.disabled = true;
+
+                    // Submit the form
+                    this.submit();
+                });
+            }
+        });

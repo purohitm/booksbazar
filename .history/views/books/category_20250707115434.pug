@@ -1,0 +1,222 @@
+extends ../layout
+
+block content
+    div.container
+        // Category Header
+        div.category-header.mb-5
+            div.row.align-items-center
+                div.col-md-9
+                    h1 #{categoryName}
+                    p.text-muted #{categoryDescription}
+                div.col-md-3
+                    form(method='GET' action='' class='d-flex justify-content-end')
+                        select.form-select.form-select-sm
+                            option(value='relevance') Relevance
+                            option(value='newest') Newest
+                            option(value='price') Price (Low to High)
+                            option(value='price-desc') Price (High to Low)
+
+        // Filter Section
+        div.filter-section.mb-4
+            div.row.g-4
+                div.col-md-3
+                    div.card.filter-card
+                        div.card-body
+                            h5.mb-3 Filter Books
+                            // Sort by
+                            div.mb-3
+                                label.form-label Sort by
+                                select.form-select(name='sort')
+                                    option(value='relevance') Relevance
+                                    option(value='newest') Newest
+                                    option(value='price') Price (Low to High)
+                                    option(value='price-desc') Price (High to Low)
+                            // Price range
+                            div.mb-3
+                                label.form-label Price Range
+                                div.d-flex.gap-2
+                                    input.form-control(type='number' name='minPrice' placeholder='Min Price')
+                                    input.form-control(type='number' name='maxPrice' placeholder='Max Price')
+                            // Book condition
+                            div.mb-3
+                                label.form-label Condition
+                                select.form-select(name='condition')
+                                    option(value='') All Conditions
+                                    option(value='new') New
+                                    option(value='like_new') Like New
+                                    option(value='good') Good
+                                    option(value='acceptable') Acceptable
+                            // Apply Filters Button
+                            button.btn.btn-primary.w-100(type='submit') Apply Filters
+
+        // Books Grid
+        div.row.g-4
+            if books && books.length > 0
+                each book in books
+                    div.col-md-3
+                        div.book-card.card.h-100
+                            // Book Cover
+                            div.position-relative
+                                img(src=book.coverImage class='card-img-top' alt=book.title style='height: 300px; object-fit: cover;')
+                                // Book Condition Badge
+                                div.position-absolute.top-0.start-0.p-2
+                                    span.badge.bg-info #{book.condition || 'New'}
+                            div.card-body.d-flex.flex-column
+                                // Book Info
+                                div.book-info.flex-grow-1
+                                    h5.card-title #{book.title || 'Unknown Title'}
+                                    p.card-text.text-muted Author: #{book.author || 'Unknown Author'}
+                                    if book.description
+                                        p.card-text.text-muted #{book.description.substring(0, 100)}...
+                                    else
+                                        p.card-text.text-muted No description available
+                                    div.d-flex.justify-content-between.align-items-center.mb-3
+                                        span.text-primary 
+                                            if (book.price && book.price !== 'Not available')
+                                                | Price: #{book.price}
+                                            else
+                                                | Price: Not available
+                                // Action Buttons
+                                div.book-actions.d-flex.gap-2
+                                    if user
+                                        form(method='POST' action=`/books/${book.id}/add-to-cart` class='d-inline')
+                                            button.btn.btn-sm.btn-outline-primary(type='submit') Add to Cart
+                                    else
+                                        a.btn.btn-sm.btn-outline-primary(href='/auth/login') Sign in to add
+                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+
+            else
+                div.text-center.p-5
+                    h3 No Books Found
+                    p.text-muted Try adjusting your filters or search criteria
+
+        // Add CSS
+        style.
+            :root {
+                --cream: #f5f0e8;
+                --muted-orange: #d4a373;
+                --dusty-blue: #7895b2;
+                --olive-green: #8a9a5b;
+                --warm-gray: #7a7a7a;
+                --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+                --shadow-dark: 0 8px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            .category-header {
+                padding: 2rem 0;
+                border-bottom: 2px solid var(--cream);
+            }
+
+            .filter-section {
+                background: var(--cream);
+                padding: 2rem;
+                border-radius: 12px;
+                box-shadow: var(--shadow-light);
+            }
+
+            .filter-card {
+                border: none;
+                box-shadow: var(--shadow-light);
+            }
+
+            .book-card {
+                border: none;
+                box-shadow: var(--shadow-light);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .book-card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-dark);
+            }
+
+            .book-card .card-img-top {
+                border-radius: 0.5rem 0.5rem 0 0;
+                transition: transform 0.3s ease;
+            }
+
+            .book-card:hover .card-img-top {
+                transform: scale(1.02);
+            }
+
+            .book-actions {
+                margin-top: auto;
+                padding-top: 1rem;
+                border-top: 1px solid var(--cream);
+            }
+
+            .book-card .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.875rem;
+                border-radius: 0.375rem;
+                flex: 1;
+            }
+
+            .book-card .btn-primary {
+                background-color: var(--muted-orange);
+                border-color: var(--muted-orange);
+            }
+
+            .book-card .btn-primary:hover {
+                background-color: #cc7a00;
+                color: white;
+            }
+
+            .book-card .btn-outline-primary {
+                color: var(--muted-orange);
+                border-color: var(--muted-orange);
+            }
+
+            .book-card .btn-outline-primary:hover {
+                background-color: var(--muted-orange);
+                color: white;
+            }
+
+            .badge.bg-info {
+                background-color: var(--olive-green) !important;
+                color: white !important;
+                font-size: 0.875rem;
+                padding: 0.375rem 0.75rem;
+            }
+
+            @media (max-width: 768px) {
+                .category-header {
+                    padding: 1.5rem 0;
+                }
+
+                .filter-section {
+                    padding: 1.5rem;
+                }
+
+                .book-actions {
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
+                .book-card .btn {
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                }
+
+                .book-card .btn:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .category-header {
+                    padding: 1rem 0;
+                }
+
+                .filter-section {
+                    padding: 1rem;
+                }
+
+                .book-card h5.card-title {
+                    font-size: 1rem;
+                }
+
+                .book-card p.card-text {
+                    font-size: 0.875rem;
+                }
+            }

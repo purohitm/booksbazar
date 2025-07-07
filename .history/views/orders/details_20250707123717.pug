@@ -1,0 +1,50 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-12
+                div.d-flex.justify-content-between.align-items-center.mb-4
+                    h1 Order ##{order.id}
+                    div
+                        span.badge.bg-#{order.status === 'pending' ? 'warning' : order.status === 'completed' ? 'success' : 'secondary'}
+                            #{order.status}
+
+                div.mb-4
+                    h5 Order Details
+                    dl.row
+                        dt.col-sm-3 Order Date
+                        dd.col-sm-9 #{new Date(order.createdAt).toLocaleString()}
+                        dt.col-sm-3 Delivery Address
+                        dd.col-sm-9
+                            pre #{order.address}
+                        dt.col-sm-3 Phone Number
+                        dd.col-sm-9 #{order.phone}
+                        dt.col-sm-3 Payment Method
+                        dd.col-sm-9 #{order.paymentMethod}
+
+                div.mb-4
+                    h5 Order Items
+                    div.table-responsive
+                        table.table.table-hover
+                            thead
+                                tr
+                                    th Product
+                                    th Price
+                                    th Quantity
+                                    th Subtotal
+                            tbody
+                                each item in order.items
+                                    tr
+                                        td
+                                            div.d-flex.align-items-center
+                                                img(src=`${item.book.coverImage}` alt=`${item.book.title}` style='width: 80px; height: 120px; object-fit: cover; margin-right: 1rem;')
+                                                div
+                                                    h6.mb-0 #{item.book.title}
+                                                    small.text-muted #{item.book.author}
+                                        td.text-end #{item.price}
+                                        td.text-center #{item.quantity}
+                                        td.text-end #{(item.price * item.quantity).toFixed(2)}
+
+                div.d-flex.justify-content-end
+                    h5 Total: #{order.total.toFixed(2)}

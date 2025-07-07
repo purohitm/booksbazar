@@ -1,0 +1,301 @@
+extends ../layout
+
+block content
+    div.container
+        div.row.mb-4
+            div.col-12
+                h1.mb-3 Your Wishlist
+                div.d-flex.gap-3
+                    // Priority Filter
+                    select.form-select.w-25(id='priorityFilter')
+                        option(value='') All Priorities
+                        option(value='high') High Priority
+                        option(value='medium') Medium Priority
+                        option(value='low') Low Priority
+                    
+                    // Category Filter
+                    select.form-select.w-25(id='categoryFilter')
+                        option(value='') All Categories
+                        option(value='course') Course Books
+                        option(value='leisure') Leisure Reading
+                        option(value='research') Research
+                        option(value='gift') Gift Ideas
+                    
+                    // Sort Options
+                    select.form-select.w-25(id='sortOption')
+                        option(value='priority') Sort by Priority
+                        option(value='category') Sort by Category
+                        option(value='price') Sort by Price
+
+        if !wishlistItems.length
+            div.text-center.p-5
+                i.fas.fa-heart.display-1.text-muted.mb-3
+                h4.text-muted Your wishlist is empty
+                p.text-muted Add books you're interested in to your wishlist
+                a.btn.btn-primary(href='/books') Browse Books
+        else
+            div.table-responsive
+                table.table.table-hover
+                    thead
+                        tr
+                            th Book
+                            th Category
+                            th Priority
+                            th Target Price
+                            th Current Price
+                            th Actions
+                    tbody
+                        each item in wishlistItems
+                            tr(data-wishlist-id=item.id)
+                                td
+                                    div.d-flex.align-items-center
+                                        img(src=`${item.book.coverImage}` alt=`${item.book.title}` style='width: 80px; height: 120px; object-fit: cover; margin-right: 1rem;')
+                                        div
+                                            h6.mb-0 #{item.book.title}
+                                            small.text-muted #{item.book.author}
+                                td
+                                    select.form-select.form-select-sm.w-50.wishlist-category
+                                        option(value='course' selected=item.category === 'course') Course
+                                        option(value='leisure' selected=item.category === 'leisure') Leisure
+                                        option(value='research' selected=item.category === 'research') Research
+                                        option(value='gift' selected=item.category === 'gift') Gift
+                                td
+                                    select.form-select.form-select-sm.w-50.wishlist-priority
+                                        option(value='high' selected=item.priority === 'high') High
+                                        option(value='medium' selected=item.priority === 'medium') Medium
+                                        option(value='low' selected=item.priority === 'low') Low
+                                td
+                                    input.form-control.form-control-sm.w-50.wishlist-target-price(type='number' step='0.01' value=item.targetPrice)
+                                td
+                                    span.text-success #{item.currentPrice || item.book.price}
+                                td
+                                    div.d-flex.gap-2
+                                        button.btn.btn-sm.btn-primary.wishlist-move-to-cart
+                                            i.fas.fa-cart-plus
+                                        button.btn.btn-sm.btn-danger.wishlist-remove
+                                            i.fas.fa-trash
+
+    // Add to Wishlist Modal
+    div.modal.fade(id='addToWishlistModal' tabindex='-1')
+        div.modal-dialog
+            div.modal-content
+                div.modal-header
+                    h5.modal-title Add to Wishlist
+                    button.close(type='button' data-bs-dismiss='modal')
+                        span(aria-hidden='true') ×
+                div.modal-body
+                    form(id='addToWishlistForm')
+                        .form-group.mb-3
+                            label(for='wishlistPriority') Priority
+                            select.form-select(id='wishlistPriority' name='priority')
+                                option(value='high') High
+                                option(value='medium' selected) Medium
+                                option(value='low') Low
+                        .form-group.mb-3
+                            label(for='wishlistCategory') Category
+                            select.form-select(id='wishlistCategory' name='category')
+                                option(value='course') Course
+                                option(value='leisure' selected) Leisure
+                                option(value='research') Research
+                                option(value='gift') Gift
+                        .form-group.mb-3
+                            label(for='wishlistTargetPrice') Target Price
+                            input.form-control(type='number' id='wishlistTargetPrice' name='targetPrice' step='0.01')
+                        .form-group.mb-3
+                            label(for='wishlistNotes') Notes
+                            textarea.form-control(id='wishlistNotes' name='notes' rows='3')
+                div.modal-footer
+                    button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+                    button.btn.btn-primary(type='submit') Add to Wishlist
+
+    // Add styles
+    style.
+        .wishlist-item-image {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .wishlist-item-info {
+            margin-left: 1rem;
+        }
+        
+        .wishlist-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+    // Add JavaScript
+    script.
+        // Initialize Bootstrap modal
+        const wishlistModal = new bootstrap.Modal(document.getElementById('addToWishlistModal'));
+        
+        // Filter and sort functionality
+        document.getElementById('priorityFilter')?.addEventListener('change', filterWishlist);
+        document.getElementById('categoryFilter')?.addEventListener('change', filterWishlist);
+        document.getElementById('sortOption')?.addEventListener('change', sortWishlist);
+        
+        function filterWishlist() {
+            const priority = document.getElementById('priorityFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const item = row.dataset;
+                const show = (!priority || item.priority === priority) && (!category || item.category === category);
+                row.style.display = show ? '' : 'none';
+            });
+        }
+        
+        function sortWishlist() {
+            const option = document.getElementById('sortOption').value;
+            const tbody = document.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                const aValue = a.dataset[option];
+                const bValue = b.dataset[option];
+                return aValue.localeCompare(bValue);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        // Wishlist item updates
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update category
+            document.querySelectorAll('.wishlist-category').forEach(select => {
+                select.addEventListener('change', async (e) => {
+                    const wishlistId = e.target.closest('tr').dataset.wishlistId;
+                    const category = e.target.value;
+                    
+                    try {
+                        const response = await fetch(`/wishlist/update/${wishlistId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ category })
+                        });
+                        
+                        if (!response.ok) throw new Error('Failed to update category');
+                        
+                        // Update the row data
+                        e.target.closest('tr').dataset.category = category;
+                    } catch (error) {
+                        console.error('Error updating category:', error);
+                        alert('Failed to update category');
+                    }
+                });
+            });
+            
+            // Update priority
+            document.querySelectorAll('.wishlist-priority').forEach(select => {
+                select.addEventListener('change', async (e) => {
+                    const wishlistId = e.target.closest('tr').dataset.wishlistId;
+                    const priority = e.target.value;
+                    
+                    try {
+                        const response = await fetch(`/wishlist/update/${wishlistId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ priority })
+                        });
+                        
+                        if (!response.ok) throw new Error('Failed to update priority');
+                        
+                        // Update the row data
+                        e.target.closest('tr').dataset.priority = priority;
+                    } catch (error) {
+                        console.error('Error updating priority:', error);
+                        alert('Failed to update priority');
+                    }
+                });
+            });
+            
+            // Update target price
+            document.querySelectorAll('.wishlist-target-price').forEach(input => {
+                input.addEventListener('change', async (e) => {
+                    const wishlistId = e.target.closest('tr').dataset.wishlistId;
+                    const targetPrice = parseFloat(e.target.value);
+                    
+                    try {
+                        const response = await fetch(`/wishlist/update/${wishlistId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ targetPrice })
+                        });
+                        
+                        if (!response.ok) throw new Error('Failed to update target price');
+                    } catch (error) {
+                        console.error('Error updating target price:', error);
+                        alert('Failed to update target price');
+                    }
+                });
+            });
+            
+            // Remove from wishlist
+            document.querySelectorAll('.wishlist-remove').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    if (!confirm('Are you sure you want to remove this book from your wishlist?')) return;
+                    
+                    const wishlistId = e.target.closest('tr').dataset.wishlistId;
+                    
+                    try {
+                        const response = await fetch(`/wishlist/remove/${wishlistId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            e.target.closest('tr').remove();
+                        } else {
+                            throw new Error('Failed to remove from wishlist');
+                        }
+                    } catch (error) {
+                        console.error('Error removing from wishlist:', error);
+                        alert('Failed to remove from wishlist');
+                    }
+                });
+            });
+            
+            // Move to cart
+            document.querySelectorAll('.wishlist-move-to-cart').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const wishlistId = e.target.closest('tr').dataset.wishlistId;
+                    const row = e.target.closest('tr');
+                    
+                    try {
+                        // First remove from wishlist
+                        const removeResponse = await fetch(`/wishlist/remove/${wishlistId}`, {
+                            method: 'POST'
+                        });
+                        
+                        if (!removeResponse.ok) throw new Error('Failed to remove from wishlist');
+                        
+                        // Then add to cart
+                        const bookId = row.querySelector('.wishlist-book-id').value;
+                        const cartResponse = await fetch(`/cart/${bookId}/add`, {
+                            method: 'POST'
+                        });
+                        
+                        if (cartResponse.ok) {
+                            // Remove the row from wishlist
+                            row.remove();
+                            alert('Book moved to cart successfully!');
+                        } else {
+                            throw new Error('Failed to add to cart');
+                        }
+                    } catch (error) {
+                        console.error('Error moving to cart:', error);
+                        alert('Failed to move to cart');
+                    }
+                });
+            });
+        });

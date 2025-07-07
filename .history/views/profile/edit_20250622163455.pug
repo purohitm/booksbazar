@@ -1,0 +1,21 @@
+extends ../layout
+
+block content
+    h1= title
+    div.container
+        div.row
+            div.col-md-4
+                if profilePicture
+                    img.img-fluid.rounded.mb-3(src=profilePicture alt='Profile Picture')
+                else
+                    img.img-fluid.rounded.mb-3(src='/images/default-profile.png' alt='Default Profile Picture')
+            div.col-md-8
+                form(action='/profile/edit' method='POST' enctype='multipart/form-data')
+                    div.form-group
+                        label(for='name') Name
+                        input.form-control(type='text' id='name' name='name' value=user.name required)
+                    div.form-group.mt-3
+                        label(for='profilePicture') Profile Picture
+                        input.form-control(type='file' id='profilePicture' name='profilePicture' accept='image/jpeg,image/png,image/gif')
+                        small.form-text.text-muted Maximum file size: 5MB. Allowed formats: JPEG, PNG, GIF
+                    button.btn.btn-primary(type='submit') Update Profile

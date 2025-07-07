@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-12
+                h1.mb-4 My Wishlist
+                
+                if wishlistItems && wishlistItems.length === 0
+                    div.text-center.p-5
+                        i.fas.fa-heart.display-1.text-muted.mb-3
+                        h4.text-muted Your wishlist is empty
+                        p.text-muted Add books you want to read or buy later
+                        a.btn.btn-primary(href='/books') Add Books
+                else
+                    div.table-responsive
+                        table.table.table-hover
+                            thead
+                                tr
+                                    th Book
+                                    th Author
+                                    th Price
+                                    th Notes
+                                    th Actions
+                            tbody
+                                each item in wishlistItems
+                                    tr
+                                        td
+                                            div.d-flex.align-items-center
+                                                img(src=`${item.book.coverImage}` alt=`${item.book.title}` style='width: 80px; height: 120px; object-fit: cover; margin-right: 1rem;')
+                                                div
+                                                    h6.mb-0 #{item.book.title}
+                                        td #{item.book.author}
+                                        td.text-end #{item.book.price}
+                                        td
+                                            if item.notes
+                                                p.text-muted #{item.notes}
+                                            else
+                                                span.text-muted No notes
+                                        td
+                                            form(method='POST' action=`/wishlist/remove/${item.id}` class='d-inline')
+                                                button.btn.btn-sm.btn-danger(type='submit')
+                                                    i.fas.fa-trash
+
+    // Add styles
+    style.
+        .wishlist-item-image {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .wishlist-item-info {
+            margin-left: 1rem;
+        }
+        
+        .wishlist-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }

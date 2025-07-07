@@ -1,0 +1,162 @@
+extends ../layout
+
+block content
+    div.container
+        div.row.g-4
+            div.col-md-4
+                // Profile Header
+                div.bg-white.rounded-3.shadow-sm.p-4.mb-4
+                    div.d-flex.align-items-center.mb-3
+                        if profilePicture
+                            img.rounded-circle.me-3(src=profilePicture alt='Profile Picture' style='width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--cream);')
+                        else
+                            img.rounded-circle.me-3(src='/images/default-profile.png' alt='Default Profile Picture' style='width: 100px; height: 100px; border: 3px solid var(--cream);')
+                        div
+                            h4.m-0 #{user.name}
+                            p.text-muted.mb-0 #{user.email}
+                            p.text-muted.mb-0 Role: #{user.role}
+                    
+                    // Stats
+                    div.d-flex.justify-content-between.border-top.pt-3
+                        div.text-center
+                            h5.mb-0 Books
+                            p.text-muted.mb-0 0
+                        div.text-center
+                            h5.mb-0 Followers
+                            p.text-muted.mb-0 0
+                        div.text-center
+                            h5.mb-0 Following
+                            p.text-muted.mb-0 0
+
+                // Profile Actions
+                div.bg-white.rounded-3.shadow-sm.p-4
+                    div.d-grid.gap-2
+                        a.btn.btn-outline-primary(href='/profile/edit') Edit Profile
+                        a.btn.btn-outline-secondary(href='/books/sell') Sell a Book
+
+            div.col-md-8
+                // Profile Tabs
+                ul.nav.nav-tabs.nav-fill.mb-4
+                    li.nav-item
+                        a.nav-link.active(href='#books' data-bs-toggle='tab') Books
+                    li.nav-item
+                        a.nav-link(href='#activity' data-bs-toggle='tab') Activity
+                    li.nav-item
+                        a.nav-link(href='#reviews' data-bs-toggle='tab') Reviews
+
+                // Tab Content
+                div.tab-content
+                    // Books Tab
+                    div.tab-pane.fade.show.active#books
+                        if books && books.length > 0
+                            each book in books
+                                div.card.mb-3
+                                    div.card-body
+                                        div.d-flex
+                                            // Book Image
+                                            div.me-3
+                                                img(src=`/uploads/books/${book.coverImage}` alt='Book Cover' style='width: 100px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: var(--shadow-light);')
+                                            // Book Info
+                                            div.w-100
+                                                h5.card-title #{book.title}
+                                                p.card-text.text-muted Author: #{book.author}
+                                                p.card-text.text-muted Condition: #{book.condition}
+                                                p.card-text.text-end.text-primary Price: $#{book.price}
+                                                div.d-flex.justify-content-end
+                                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                                    if user && book.sellerId === user.id
+                                                        a.btn.btn-sm.btn-danger(href=`/books/${book.id}/delete`) Delete
+                        else
+                            div.text-center.p-5
+                                h4 No Books Yet
+                                p.text-muted Start selling your books!
+                                a.btn.btn-primary(href='/books/sell') Sell a Book
+
+                    // Activity Tab
+                    div.tab-pane.fade#activity
+                        div.text-center.p-5
+                            h4 Your Activity
+                            p.text-muted Coming soon!
+
+                    // Reviews Tab
+                    div.tab-pane.fade#reviews
+                        div.text-center.p-5
+                            h4 Your Reviews
+                            p.text-muted Coming soon!
+
+        // Add CSS for profile page
+        style.
+            :root {
+                --cream: #f5f0e8;
+                --muted-orange: #d4a373;
+                --dusty-blue: #7895b2;
+                --olive-green: #8a9a5b;
+                --warm-gray: #7a7a7a;
+                --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+                --shadow-dark: 0 8px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            .profile-header {
+                background: var(--cream);
+                border: 2px solid var(--cream);
+                transition: transform 0.3s ease;
+            }
+
+            .profile-header:hover {
+                transform: translateY(-5px);
+            }
+
+            .nav-tabs {
+                border-bottom: none;
+            }
+
+            .nav-tabs .nav-link {
+                color: var(--warm-gray);
+                border: none;
+                border-radius: 0;
+                padding: 0.75rem;
+                transition: all 0.3s ease;
+            }
+
+            .nav-tabs .nav-link:hover {
+                color: var(--muted-orange);
+            }
+
+            .nav-tabs .nav-link.active {
+                color: var(--muted-orange);
+                border-bottom: 3px solid var(--muted-orange);
+            }
+
+            .card {
+                border: none;
+                box-shadow: var(--shadow-light);
+                transition: transform 0.3s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-dark);
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .btn-primary {
+                background-color: var(--muted-orange);
+                border-color: var(--muted-orange);
+            }
+
+            .btn-primary:hover {
+                background-color: #cc7a00;
+            }
+
+            .btn-outline-primary {
+                color: var(--muted-orange);
+                border-color: var(--muted-orange);
+            }
+
+            .btn-outline-primary:hover {
+                background-color: var(--muted-orange);
+                color: white;
+            }

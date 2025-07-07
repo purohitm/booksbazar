@@ -1,0 +1,114 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            // Book Cover and Info
+            div.col-md-4
+                img(src=book.coverImage class='img-fluid rounded shadow-sm' alt=book.title)
+                div.mt-3
+                    if user
+                        if book.saleInfo && book.saleInfo.buyLink
+                            a.btn.btn-primary.w-100(href=book.saleInfo.buyLink target='_blank') Buy Now
+                        else
+                            button.btn.btn-primary.w-100 disabled Out of Stock
+                        div.mt-3
+                            button.btn.btn-outline-primary.w-100 Add to Wishlist
+                    else
+                        div.text-center
+                            p.text-muted Please login to buy or add to wishlist
+                            a.btn.btn-primary(href='/auth/login') Login
+            
+            // Book Details
+            div.col-md-8
+                h1 #{book.title}
+                h4.text-muted #{book.author}
+                
+                // Book Info
+                div.row.mb-4
+                    div.col-md-4
+                        p.text-muted
+                            strong Published:
+                            |  #{book.publishedDate || 'Unknown'}
+                    div.col-md-4
+                        p.text-muted
+                            strong Pages:
+                            |  #{book.pageCount || 0}
+                    div.col-md-4
+                        p.text-muted
+                            strong Language:
+                            |  #{book.language || 'English'}
+
+                // Description
+                div.mb-4
+                    h4 Description
+                    p #{book.description || 'No description available'}
+
+                // Categories
+                if book.categories && book.categories.length > 0
+                    div.mb-4
+                        h4 Categories
+                        div.d-flex.flex-wrap.gap-2
+                            each category in book.categories
+                                span.badge.bg-primary #{category}
+
+                // Price
+                if book.saleInfo && book.saleInfo.listPrice
+                    div
+                        h4.text-primary Price: $#{book.saleInfo.listPrice.amount}
+                        small.text-muted Original Price: $#{book.saleInfo.listPrice.amount}
+                else
+                    p.text-muted Price: Not available
+
+                // Preview
+                if book.previewLink
+                    div.mt-4
+                        a.btn.btn-outline-primary(href=book.previewLink target='_blank') Preview Book
+
+        // Similar Books
+        if similarBooks && similarBooks.length > 0
+            div.row.mt-5
+                div.col-12
+                    h4 Similar Books
+                    div.row.g-4
+                        each similar in similarBooks
+                            div.col-md-3
+                                div.card
+                                    img(src=similar.coverImage class='card-img-top' alt=similar.title)
+                                    div.card-body
+                                        h5.card-title #{similar.title}
+                                        p.card-text.text-muted #{similar.author}
+                                        if user
+                                            a.btn.btn-sm.btn-primary(href=`/books/${similar.id}/add-to-cart`) Add to Cart
+                                        else
+                                            a.btn.btn-sm.btn-primary(href='/auth/login') Login to Add
+                                        a.btn.btn-sm.btn-primary(href=`/books/${similar.id}`) View Details
+
+    // Add CSS for book detail page
+    style.
+        .book-detail {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .book-cover {
+            height: 400px;
+            object-fit: cover;
+        }
+        .book-info {
+            margin-top: 2rem;
+        }
+        .book-description {
+            white-space: pre-wrap;
+        }
+        .similar-books {
+            margin-top: 3rem;
+        }
+        .similar-books .card {
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        .similar-books .card:hover {
+            transform: translateY(-5px);
+        }

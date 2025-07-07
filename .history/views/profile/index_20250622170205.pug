@@ -1,0 +1,118 @@
+extends ../layout
+
+block content
+    div.container
+        div.row
+            div.col-md-4
+                // Profile Header
+                div.bg-light.rounded-3.shadow-sm.p-4.mb-4
+                    div.d-flex.align-items-center.mb-3
+                        if profilePicture
+                            img.rounded-circle.me-3(src=profilePicture alt='Profile Picture' style='width: 100px; height: 100px; object-fit: cover;')
+                        else
+                            img.rounded-circle.me-3(src='/images/default-profile.png' alt='Default Profile Picture' style='width: 100px; height: 100px;')
+                        div
+                            h4.m-0 #{user.name}
+                            p.text-muted.mb-0 #{user.email}
+                            p.text-muted.mb-0 Role: #{user.role}
+                    
+                    // Stats
+                    div.d-flex.justify-content-between.border-top.pt-3
+                        div.text-center
+                            h5.mb-0 Books
+                            p.text-muted.mb-0 0
+                        div.text-center
+                            h5.mb-0 Followers
+                            p.text-muted.mb-0 0
+                        div.text-center
+                            h5.mb-0 Following
+                            p.text-muted.mb-0 0
+
+                // Profile Actions
+                div.bg-light.rounded-3.shadow-sm.p-4
+                    div.d-grid.gap-2
+                        a.btn.btn-outline-primary(href='/profile/edit') Edit Profile
+                        a.btn.btn-outline-secondary(href='/books/sell') Sell a Book
+
+            div.col-md-8
+                // Profile Tabs
+                ul.nav.nav-tabs.mb-4
+                    li.nav-item
+                        a.nav-link.active(href='#books' data-bs-toggle='tab') Books
+                    li.nav-item
+                        a.nav-link(href='#activity' data-bs-toggle='tab') Activity
+                    li.nav-item
+                        a.nav-link(href='#reviews' data-bs-toggle='tab') Reviews
+
+                // Tab Content
+                div.tab-content
+                    // Books Tab
+                    div.tab-pane.fade.show.active#books
+                        if books && books.length > 0
+                            each book in books
+                                div.card.mb-3
+                                    div.card-body
+                                        div.d-flex
+                                            // Book Image
+                                            div.me-3
+                                                img(src=`/uploads/books/${book.coverImage}` alt='Book Cover' style='width: 100px; height: 150px; object-fit: cover;')
+                                            // Book Info
+                                            div.w-100
+                                                h5.card-title #{book.title}
+                                                p.card-text.text-muted Author: #{book.author}
+                                                p.card-text.text-muted Condition: #{book.condition}
+                                                p.card-text.text-end.text-primary Price: $#{book.price}
+                                                div.d-flex.justify-content-end
+                                                    a.btn.btn-sm.btn-primary(href=`/books/${book.id}`) View Details
+                                                    if user && book.sellerId === user.id
+                                                        a.btn.btn-sm.btn-danger(href=`/books/${book.id}/delete`) Delete
+                        else
+                            div.text-center.p-5
+                                h4 No Books Yet
+                                p.text-muted Start selling your books!
+                                a.btn.btn-primary(href='/books/sell') Sell a Book
+
+                    // Activity Tab
+                    div.tab-pane.fade#activity
+                        div.text-center.p-5
+                            h4 Your Activity
+                            p.text-muted Coming soon!
+
+                    // Reviews Tab
+                    div.tab-pane.fade#reviews
+                        div.text-center.p-5
+                            h4 Your Reviews
+                            p.text-muted Coming soon!
+
+        // Add CSS for profile page
+        style.
+            .profile-header {
+                background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 1rem;
+                margin-bottom: 2rem;
+            }
+            .profile-header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .profile-header p {
+                margin-bottom: 1rem;
+            }
+            .stats {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 2rem;
+            }
+            .stat-item {
+                text-align: center;
+            }
+            .stat-item h3 {
+                margin-bottom: 0.5rem;
+                font-size: 1.5rem;
+            }
+            .stat-item p {
+                margin-bottom: 0;
+                color: #666;
+            }
