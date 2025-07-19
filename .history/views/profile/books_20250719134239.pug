@@ -1,0 +1,26 @@
+extends ../layout
+
+block content
+    .container.mt-5.mb-5
+        h2.mb-4 My Listed Books
+        if books.length === 0
+            .alert.alert-info You have not listed any books yet.
+            a.btn.btn-primary(href='/books/sell') List a Book
+        else
+            .row.g-4
+                each book in books
+                    .col-md-4.col-lg-3
+                        .card.h-100.shadow-sm
+                            if book.coverImage
+                                img.card-img-top(src=book.coverImage alt=book.title style='height: 220px; object-fit: cover;')
+                            .card-body.d-flex.flex-column
+                                h5.card-title.mb-2 #{book.title}
+                                p.card-text.text-muted.mb-1 Author: #{book.author}
+                                p.card-text.text-muted.mb-1 Price: £#{Number(book.price).toFixed(2)}
+                                p.card-text.text-muted.mb-1 Condition: #{book.condition || 'New'}
+                                p.card-text.text-muted.mb-1 Status: #{book.status || 'Available'}
+                                if book.description
+                                    p.card-text.mt-2 #{book.description.substring(0, 60)}...
+                                else
+                                    p.card-text.mt-2.text-muted No description available
+                                //- Optionally add edit/delete buttons here

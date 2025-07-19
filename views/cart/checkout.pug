@@ -1,0 +1,58 @@
+extends ../layout
+
+block content
+    .container.mt-5.mb-5
+        h2.mb-4 Checkout
+        if cartItems.length === 0
+            .alert.alert-warning Your cart is empty.
+            a.btn.btn-primary(href='/books') Continue Shopping
+        else
+            .card.shadow.p-4.mb-4
+                h4.mb-3 Shipping & Payment Details
+                form(method='POST', action='/cart/checkout')
+                    .mb-3
+                        label.form-label(for='address') Shipping Address
+                        input.form-control(type='text', name='address', id='address', required)
+                    .mb-3
+                        label.form-label(for='phone') Phone Number
+                        input.form-control(type='tel', name='phone', id='phone', required)
+                    .mb-3
+                        label.form-label(for='paymentMethod') Payment Method
+                        select.form-select(name='paymentMethod', id='paymentMethod', required onchange='toggleCardFields()')
+                            option(value='') -- Select Payment Method --
+                            option(value='Card') Credit/Debit Card
+                            option(value='COD') Cash on Delivery
+                    // Card fields (shown only if Card is selected)
+                    .card-fields(style='display:none;')
+                        .mb-3
+                            label.form-label(for='cardName') Cardholder Name
+                            input.form-control(type='text', name='cardName', id='cardName')
+                        .mb-3
+                            label.form-label(for='cardNumber') Card Number
+                            input.form-control(type='text', name='cardNumber', id='cardNumber', maxlength='16')
+                        .mb-3
+                            label.form-label(for='expiry') Expiry Date
+                            input.form-control(type='text', name='expiry', id='expiry', placeholder='MM/YY')
+                        .mb-3
+                            label.form-label(for='cvv') CVV
+                            input.form-control(type='password', name='cvv', id='cvv', maxlength='4')
+                    button.btn.btn-success.btn-lg.mt-3(type='submit') Pay & Place Order
+            .card.mt-4
+                h4.mb-3 Order Summary
+                ul.list-group.list-group-flush
+                    each item in cartItems
+                        li.list-group-item.d-flex.justify-content-between.align-items-center
+                            span #{item.book.title} × #{item.quantity}
+                            span ₹#{item.book.price * item.quantity}
+                li.list-group-item.d-flex.justify-content-between.align-items-center.fw-bold
+                    span Total
+                    span ₹#{total}
+    script.
+        function toggleCardFields() {
+            var method = document.getElementById('paymentMethod').value;
+            var cardFields = document.querySelector('.card-fields');
+            cardFields.style.display = (method === 'Card') ? 'block' : 'none';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCardFields();
+        });

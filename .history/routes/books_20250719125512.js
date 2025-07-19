@@ -253,63 +253,6 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// GET /books/:id/edit - Show edit form for a book
-router.get('/:id/edit', auth, async (req, res) => {
-    try {
-        const book = await Book.findByPk(req.params.id);
-        if (!book || book.userId !== req.user.id) {
-            req.flash('error', 'Book not found or unauthorized');
-            return res.redirect('/profile/books');
-        }
-        res.render('books/edit', {
-            title: 'Edit Book',
-            book,
-            user: req.user
-        });
-    } catch (error) {
-        console.error('Error loading edit form:', error);
-        req.flash('error', 'Error loading edit form');
-        res.redirect('/profile/books');
-    }
-});
-
-// POST /books/:id/edit - Handle book edit form submission
-router.post('/:id/edit', auth, async (req, res) => {
-    try {
-        const book = await Book.findByPk(req.params.id);
-        if (!book || book.userId !== req.user.id) {
-            req.flash('error', 'Book not found or unauthorized');
-            return res.redirect('/profile/books');
-        }
-        const { title, author, price, condition, description, status } = req.body;
-        await book.update({ title, author, price, condition, description, status });
-        req.flash('success', 'Book updated successfully');
-        res.redirect('/profile/books');
-    } catch (error) {
-        console.error('Error updating book:', error);
-        req.flash('error', 'Error updating book');
-        res.redirect('/profile/books');
-    }
-});
-
-// POST /books/:id/delete - Delete a book
-router.post('/:id/delete', auth, async (req, res) => {
-    try {
-        const book = await Book.findByPk(req.params.id);
-        if (!book || book.userId !== req.user.id) {
-            req.flash('error', 'Book not found or unauthorized');
-            return res.redirect('/profile/books');
-        }
-        await book.destroy();
-        req.flash('success', 'Book deleted successfully');
-        res.redirect('/profile/books');
-    } catch (error) {
-        console.error('Error deleting book:', error);
-        req.flash('error', 'Error deleting book');
-        res.redirect('/profile/books');
-    }
-});
-
 // Category route
 router.get('/category/:category', async (req, res) => {
     try {

@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+    .container.mt-5.mb-5
+        h2.mb-4 Edit Book
+        if error
+            .alert.alert-danger #{error}
+        if success
+            .alert.alert-success #{success}
+        form(method='POST', action='/books/' + book.id + '/edit')
+            .mb-3
+                label.form-label(for='title') Title
+                input.form-control(type='text', name='title', id='title', required, value=book.title)
+            .mb-3
+                label.form-label(for='author') Author
+                input.form-control(type='text', name='author', id='author', value=book.author)
+            .mb-3
+                label.form-label(for='price') Price (£)
+                input.form-control(type='number', name='price', id='price', step='0.01', min='0', value=book.price)
+            .mb-3
+                label.form-label(for='condition') Condition
+                select.form-select(name='condition', id='condition')
+                    option(value='New', selected=book.condition==='New') New
+                    option(value='Used', selected=book.condition==='Used') Used
+            .mb-3
+                label.form-label(for='status') Status
+                select.form-select(name='status', id='status')
+                    option(value='Available', selected=book.status==='Available') Available
+                    option(value='Sold', selected=book.status==='Sold') Sold
+            .mb-3
+                label.form-label(for='description') Description
+                textarea.form-control(name='description', id='description', rows='4') #{book.description}
+            button.btn.btn-success(type='submit') Save Changes
+            a.btn.btn-secondary.ms-2(href='/profile/books') Cancel

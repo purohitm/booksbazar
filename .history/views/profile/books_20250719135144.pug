@@ -1,0 +1,43 @@
+extends ../layout
+
+block content
+    .container.mt-5.mb-5
+        h2.mb-4 My Listed Books
+        if books.length === 0
+            .alert.alert-info You have not listed any books yet.
+            a.btn.btn-primary(href='/books/sell') List a Book
+        else
+            .row.g-4
+                each book in books
+                    .col-md-4.col-lg-3
+                        .card.h-100.shadow-sm
+                            if book.coverImage
+                                img.card-img-top(src=book.coverImage alt=book.title style='height: 220px; object-fit: cover;')
+                            .card-body.d-flex.flex-column
+                                h5.card-title.mb-2 #{book.title}
+                                p.card-text.text-muted.mb-1 Author: #{book.author}
+                                p.card-text.text-muted.mb-1 Price: £#{Number(book.price).toFixed(2)}
+                                p.card-text.text-muted.mb-1 Condition: #{book.condition || 'New'}
+                                p.card-text.text-muted.mb-1 Status: #{book.status || 'Available'}
+                                if book.description
+                                    p.card-text.mt-2 #{book.description.substring(0, 60)}...
+                                else
+                                    p.card-text.mt-2.text-muted No description available
+                                .mt-auto.d-flex.justify-content-between.align-items-center
+                                    a.btn.btn-outline-primary.btn-sm(href='/books/' + book.id + '/edit') Edit
+                                    button.btn.btn-outline-danger.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#deleteModal-' + book.id) Delete
+
+                                // Delete Confirmation Modal
+                                .modal.fade(id='deleteModal-' + book.id, tabindex='-1', aria-labelledby='deleteModalLabel-' + book.id, aria-hidden='true')
+                                    .modal-dialog.modal-dialog-centered
+                                        .modal-content
+                                            .modal-header.bg-danger.text-white
+                                                h5.modal-title(id='deleteModalLabel-' + book.id) Confirm Delete
+                                                button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                                            .modal-body
+                                                p Are you sure you want to delete this book?
+                                                p.text-danger This action cannot be undone.
+                                            .modal-footer
+                                                button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Cancel
+                                                form(method='POST', action='/books/' + book.id + '/delete', style='display:inline')
+                                                    button.btn.btn-danger(type='submit') Yes, Delete

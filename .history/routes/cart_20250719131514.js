@@ -110,11 +110,11 @@ router.post('/checkout', auth, async (req, res) => {
         // Create order (fake payment)
         const order = await Order.create({
             userId: req.user.id,
-            shippingAddress: address,
+            address,
             phone,
             paymentMethod,
             paymentStatus: 'Completed',
-            totalAmount: cartItems.reduce((sum, item) => sum + (item.book.price * item.quantity), 0)
+            total: cartItems.reduce((sum, item) => sum + (item.book.price * item.quantity), 0)
         });
         // Create order items
         await Promise.all(cartItems.map(async (item) => {
