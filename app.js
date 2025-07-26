@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const FileStore = require('session-file-store')(session);
 const passport = require('passport');
 const flash = require('connect-flash');
 const path = require('path');
@@ -21,8 +22,14 @@ app.use(express.static('public'));
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-// Session configuration
+// Session configuration with persistent file storage
 app.use(session({
+    store: new FileStore({
+        path: './sessions',
+        ttl: 10800, // 3 hours in seconds
+        retries: 0,
+        logFn: function() {} // Disable logging
+    }),
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
@@ -75,6 +82,7 @@ app.use('/orders', require('./routes/orders'));
 app.use('/profile', require('./routes/profile'));
 app.use('/about', require('./routes/about'));
 app.use('/contact', require('./routes/contact'));
+app.use('/challenges', require('./routes/challenges'));
 
 // Root route - redirect to login if not authenticated
 // app.get('/', (req, res) => {

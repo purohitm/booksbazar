@@ -27,6 +27,60 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// POST /cart/add - Add book to cart
+router.post('/add', auth, async (req, res) => {
+    try {
+        const { bookId, quantity = 1 } = req.body;
+        
+        if (!bookId) {
+            return res.status(400).json({ error: 'Book ID is required' });
+        }
+
+        // Check if book exists
+        const book = await Book.findByPk(bookId);
+        if (!book) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        // Prevent users from adding their own books to cart
+        if (book.userId === req.user.id) {
+            return res.status(400).json({ 
+                error: 'You cannot purchase your own book. Your books are available in the "My Books" section.' 
+            });
+        }
+
+        // Check if item already exists in cart
+        const existingCartItem = await Cart.findOne({
+            where: {
+                userId: req.user.id,
+                bookId: bookId
+            }
+        });
+
+        if (existingCartItem) {
+            // Update quantity if item already exists
+            await existingCartItem.update({
+                quantity: existingCartItem.quantity + parseInt(quantity)
+            });
+        } else {
+            // Create new cart item
+            await Cart.create({
+                userId: req.user.id,
+                bookId: bookId,
+                quantity: parseInt(quantity)
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Book added to cart successfully' 
+        });
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        res.status(500).json({ error: 'Failed to add book to cart' });
+    }
+});
+
 // POST /cart/:id/remove - Remove cart item
 router.post('/:id/remove', auth, async (req, res) => {
     try {

@@ -121,14 +121,46 @@ router.get('/orders', auth, async (req, res) => {
 // GET /profile/books - Show user's listed books
 router.get('/books', auth, async (req, res) => {
     try {
-        const { Book } = require('../config/db').models;
+        const { Book, Challenge } = require('../config/db').models;
+        
+        // Get books owned by the user
         const books = await Book.findAll({
             where: { userId: req.user.id },
             order: [['createdAt', 'DESC']]
         });
+        
+        // Get challenge status for each book to enable lock toggle functionality
+        const booksWithChallenges = await Promise.all(books.map(async (book) => {
+            try {
+                // Use raw SQL to avoid schema mismatch issues
+                const { sequelize } = require('../config/db');
+                const challengeResults = await sequelize.query(
+                    'SELECT id FROM Challenges WHERE bookId = ? LIMIT 1',
+                    {
+                        replacements: [book.id],
+                        type: sequelize.QueryTypes.SELECT
+                    }
+                );
+                
+                return {
+                    ...book.toJSON(),
+                    hasChallenge: challengeResults.length > 0,
+                    challengeId: challengeResults.length > 0 ? challengeResults[0].id : null
+                };
+            } catch (challengeError) {
+                console.log('Note: Challenge check skipped for book', book.id, ':', challengeError.message);
+                return {
+                    ...book.toJSON(),
+                    hasChallenge: false,
+                    challengeId: null
+                };
+            }
+        }));
+        
+        console.log('DEBUG: booksWithChallenges =', booksWithChallenges);
         res.render('profile/books', {
             title: 'My Books',
-            books,
+            books: booksWithChallenges,
             user: req.user
         });
     } catch (error) {

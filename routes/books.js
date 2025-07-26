@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { models } = require('../config/db');
-const { Book, User, Cart, Saved, Payment, Order, OrderItem } = models;
+const { models, sequelize } = require('../config/db');
+const { Book, User, Cart, Saved, Payment, Order, OrderItem, Challenge, UserAttempts } = models;
 const auth = require('../middleware/auth');
 
 // GET /books - Display all books with pagination
@@ -51,7 +51,15 @@ router.get('/', async (req, res) => {
 // GET /books - Browse all books
 router.get('/browse', async (req, res) => {
     try {
+        // Exclude user's own books from browse listings
+        const whereClause = {};
+        if (req.user && req.user.id) {
+            const { Op } = require('sequelize');
+            whereClause.userId = { [Op.ne]: req.user.id };
+        }
+        
         const books = await Book.findAll({
+            where: whereClause,
             order: [['createdAt', 'DESC']]
         });
         res.render('books/browse', {
@@ -239,9 +247,137 @@ router.get('/:id', async (req, res) => {
             book.condition = 'New'; // Default condition
         }
 
+        // SECURITY: Never automatically assign ownership to visitors
+        // Books without proper ownership should not be manageable by random users
+        if (!book.userId) {
+            console.log(`⚠️  Book ${book.id} has no owner - this book cannot be managed by any user`);
+            // Do NOT assign ownership - this would be a security violation
+        }
+
+        // Phase 3: Check if book has a challenge and get challenge data
+        let challenge = null;
+        let attemptCount = 0;
+        let userHasSolved = false;
+        let hasExistingChallenge = false; // For book owner
+
+        try {
+            console.log('🔍 Checking for challenges for bookId:', bookId);
+            console.log('🔍 BookId type:', typeof bookId);
+            
+            // DIRECT FIX: Check if ANY challenge exists for this book
+            const challengeCount = await Challenge.count({
+                where: { 
+                    bookId: bookId
+                }
+            });
+            console.log('🔍 Total challenges for this book:', challengeCount);
+            
+            // If ANY challenge exists, set hasExistingChallenge to true
+            if (challengeCount > 0) {
+                hasExistingChallenge = true;
+                console.log('🔍 FORCE: hasExistingChallenge set to true because challenge exists');
+            }
+            
+            // First, let's see all challenges in the database
+            const allChallenges = await Challenge.findAll({
+                attributes: ['id', 'bookId', 'createdBy', 'isActive']
+            });
+            console.log('🔍 All challenges in database:', allChallenges.map(c => ({
+                id: c.id,
+                bookId: c.bookId,
+                createdBy: c.createdBy,
+                isActive: c.isActive
+            })));
+            
+            challenge = await Challenge.findOne({
+                where: { 
+                    bookId: bookId.toString(), // Ensure string comparison
+                    isActive: true 
+                },
+                attributes: ['id', 'question', 'difficulty', 'ownerId'] // Use ownerId
+            });
+
+            // If not found with string, try without toString()
+            if (!challenge) {
+                console.log('🔍 Trying query without toString()...');
+                challenge = await Challenge.findOne({
+                    where: { 
+                        bookId: bookId,
+                        isActive: true 
+                    },
+                    attributes: ['id', 'question', 'difficulty', 'ownerId']
+                });
+            }
+
+            // If still not found, try finding ANY challenge for this book
+            if (!challenge) {
+                console.log('🔍 Trying to find ANY challenge for this book...');
+                challenge = await Challenge.findOne({
+                    where: { 
+                        bookId: bookId.toString()
+                    },
+                    attributes: ['id', 'question', 'difficulty', 'ownerId', 'isActive']
+                });
+                console.log('🔍 Found challenge with any criteria:', challenge ? 'YES' : 'NO');
+                if (challenge) {
+                    console.log('🔍 Challenge isActive value:', challenge.isActive);
+                }
+            }
+
+            console.log('🔍 Challenge found:', challenge ? 'YES' : 'NO');
+            if (challenge) {
+                hasExistingChallenge = true;
+                console.log('🔍 hasExistingChallenge set to:', hasExistingChallenge);
+                
+                if (req.user) {
+                    console.log('🔍 Current user ID:', req.user.id);
+                    console.log('🔍 Challenge owner ID:', challenge.ownerId);
+                    console.log('🔍 User is owner?', challenge.ownerId === req.user.id);
+                    // If current user is the challenge owner (book owner), don't show challenge interface
+                    if (challenge.ownerId === req.user.id) {
+                        challenge = null; // Owner sees normal book content
+                        console.log('🔍 Challenge set to null for owner');
+                    } else {
+                        // For other users, check if they've solved it
+                        const attempts = await UserAttempts.findAll({
+                            where: {
+                                challengeId: challenge.id,
+                                userId: req.user.id
+                            }
+                        });
+                        
+                        attemptCount = attempts.length;
+                        userHasSolved = attempts.some(attempt => attempt.isCorrect);
+                        
+                        // If user has solved it, don't show challenge interface
+                        if (userHasSolved) {
+                            challenge = null;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching challenge data:', error);
+            // Continue without challenge data if there's an error
+        }
+
+        // DEBUG: Log the values being passed to template
+        console.log('🔍 DEBUG - Template Data:');
+        console.log('- bookId:', bookId);
+        console.log('- userId:', req.user ? req.user.id : 'not logged in');
+        console.log('- book.userId:', book.userId);
+        console.log('- hasExistingChallenge:', hasExistingChallenge);
+        console.log('- challenge (for display):', challenge ? 'exists' : 'null');
+        console.log('- attemptCount:', attemptCount);
+        console.log('- userHasSolved:', userHasSolved);
+
         res.render('books/detail', {
             title: book.title,
             book,
+            challenge,
+            attemptCount,
+            userHasSolved,
+            hasExistingChallenge, // Pass this to template
             user: req.user
         });
     } catch (error) {
@@ -300,12 +436,150 @@ router.post('/:id/delete', auth, async (req, res) => {
             req.flash('error', 'Book not found or unauthorized');
             return res.redirect('/profile/books');
         }
+
+        // Clean up all related records before deleting the book
+        const bookId = book.id;
+        console.log(`🔍 DEBUG: Starting deletion process for book: ${book.title} (ID: ${bookId})`);
+        
+        // 1. Remove from all carts
+        console.log('🔍 DEBUG: Checking cart references...');
+        const cartItems = await Cart.findAll({ where: { bookId: bookId } });
+        console.log(`🔍 DEBUG: Found ${cartItems.length} cart references`);
+        
+        await Cart.destroy({
+            where: { bookId: bookId }
+        });
+        console.log('✅ DEBUG: Cart cleanup completed');
+        
+        // 2. Remove any challenges and user attempts using raw queries to avoid schema issues
+        console.log('🔍 DEBUG: Checking challenge references...');
+        try {
+            // First, get challenge IDs for this book using raw SQL
+            const challengeResults = await sequelize.query(
+                'SELECT id FROM Challenges WHERE bookId = ?',
+                {
+                    replacements: [bookId],
+                    type: sequelize.QueryTypes.SELECT
+                }
+            );
+            console.log(`🔍 DEBUG: Found ${challengeResults.length} challenges`);
+            
+            if (challengeResults && challengeResults.length > 0) {
+                const challengeIds = challengeResults.map(c => c.id);
+                console.log(`🔍 DEBUG: Challenge IDs: ${challengeIds.join(', ')}`);
+                
+                // Check user attempts first (handle missing table gracefully)
+                try {
+                    const attemptResults = await sequelize.query(
+                        'SELECT COUNT(*) as count FROM UserAttempts WHERE challengeId IN (' + challengeIds.map(() => '?').join(',') + ')',
+                        {
+                            replacements: challengeIds,
+                            type: sequelize.QueryTypes.SELECT
+                        }
+                    );
+                    console.log(`🔍 DEBUG: Found ${attemptResults[0].count} user attempts`);
+                    
+                    // Remove all user attempts for these challenges (fix IN clause syntax)
+                    if (challengeIds.length > 0) {
+                        const placeholders = challengeIds.map(() => '?').join(',');
+                        await sequelize.query(
+                            `DELETE FROM UserAttempts WHERE challengeId IN (${placeholders})`,
+                            {
+                                replacements: challengeIds,
+                                type: sequelize.QueryTypes.DELETE
+                            }
+                        );
+                        console.log('✅ DEBUG: User attempts cleanup completed');
+                    }
+                } catch (attemptError) {
+                    if (attemptError.message.includes("doesn't exist")) {
+                        console.log('ℹ️ DEBUG: UserAttempts table doesn\'t exist - skipping user attempts cleanup');
+                    } else {
+                        console.error('⚠️ DEBUG: UserAttempts cleanup error:', attemptError.message);
+                        // Don't throw - continue with challenge deletion
+                    }
+                }
+                
+                // Remove the challenges
+                try {
+                    await sequelize.query(
+                        'DELETE FROM Challenges WHERE bookId = ?',
+                        {
+                            replacements: [bookId],
+                            type: sequelize.QueryTypes.DELETE
+                        }
+                    );
+                    console.log('✅ DEBUG: Challenges cleanup completed');
+                } catch (challengeDeleteError) {
+                    if (challengeDeleteError.message.includes("doesn't exist")) {
+                        console.log('ℹ️ DEBUG: Challenges table doesn\'t exist - skipping challenge cleanup');
+                    } else {
+                        console.error('⚠️ DEBUG: Challenge deletion error:', challengeDeleteError.message);
+                        // Continue anyway - don't let this block book deletion
+                    }
+                }
+            } else {
+                console.log('✅ DEBUG: No challenges found for this book');
+            }
+        } catch (challengeError) {
+            if (challengeError.message.includes("doesn't exist")) {
+                console.log('ℹ️ DEBUG: Challenges table doesn\'t exist - skipping all challenge cleanup');
+            } else {
+                console.error('⚠️ DEBUG: Challenge lookup error:', challengeError.message);
+                // Continue anyway - don't let missing challenge tables block book deletion
+            }
+        }
+        
+        // 3. Remove from saved items (if exists)
+        console.log('🔍 DEBUG: Checking saved items...');
+        try {
+            const savedItems = await Saved.findAll({ where: { bookId: bookId } });
+            console.log(`🔍 DEBUG: Found ${savedItems.length} saved items`);
+            await Saved.destroy({
+                where: { bookId: bookId }
+            });
+            console.log('✅ DEBUG: Saved items cleanup completed');
+        } catch (savedError) {
+            console.log('ℹ️ DEBUG: Saved table doesn\'t exist or error:', savedError.message);
+        }
+        
+        // 4. Remove from order items (if exists)
+        console.log('🔍 DEBUG: Checking order items...');
+        try {
+            const orderItems = await OrderItem.findAll({ where: { bookId: bookId } });
+            console.log(`🔍 DEBUG: Found ${orderItems.length} order items`);
+            await OrderItem.destroy({
+                where: { bookId: bookId }
+            });
+            console.log('✅ DEBUG: Order items cleanup completed');
+        } catch (orderError) {
+            console.log('ℹ️ DEBUG: OrderItem table doesn\'t exist or error:', orderError.message);
+        }
+        
+        // 5. Check for any remaining foreign key references
+        console.log('🔍 DEBUG: Checking for remaining foreign key references...');
+        try {
+            // Check all tables that might reference this book
+            const foreignKeyChecks = await Promise.all([
+                sequelize.query('SELECT COUNT(*) as count FROM Carts WHERE bookId = ?', { replacements: [bookId], type: sequelize.QueryTypes.SELECT }),
+                sequelize.query('SELECT COUNT(*) as count FROM Challenges WHERE bookId = ?', { replacements: [bookId], type: sequelize.QueryTypes.SELECT })
+            ]);
+            
+            console.log(`🔍 DEBUG: Remaining references - Carts: ${foreignKeyChecks[0][0].count}, Challenges: ${foreignKeyChecks[1][0].count}`);
+        } catch (fkError) {
+            console.log('ℹ️ DEBUG: Could not check foreign key references:', fkError.message);
+        }
+        
+        // 6. Finally, delete the book
+        console.log('🔍 DEBUG: Attempting to delete the book...');
         await book.destroy();
-        req.flash('success', 'Book deleted successfully');
+        console.log('✅ DEBUG: Book deletion completed successfully!');
+        
+        req.flash('success', 'Book and all related data deleted successfully');
         res.redirect('/profile/books');
     } catch (error) {
         console.error('Error deleting book:', error);
-        req.flash('error', 'Error deleting book');
+        req.flash('error', 'Error deleting book: ' + error.message);
         res.redirect('/profile/books');
     }
 });
